@@ -110,7 +110,7 @@ for( i in 1:length(genotypes)){
   print(pvalue)
 }
 
-##### Heritability                              ########################### Double check this is right with jason
+##### Heritability                          
 myvars <- as.list(colnames(Herb_data[5:11]))  # create a list of traits
 
 
@@ -289,7 +289,7 @@ for( i in 1:length(genotypes)){
   print(pvalue)
 }
 
-##### Heritability                              ########################### Double check this is right with jason
+##### Heritability                              
 myvars <- as.list(colnames(Burk_data[5:8]))  # create a list of traits
 
 
@@ -297,7 +297,7 @@ myvars <- as.list(colnames(Burk_data[5:8]))  # create a list of traits
 linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~Genotype*Condition')), data = Burk_data) 
                  %>% anova()) 
 #%>% tidy()) 
-#calcs <- lapply(linreg, function(j)(j[3,3]/sum(j[3]))) #this is incorrect
+
 calcs <- lapply(linreg, function(j)(j[3,2]/(j[3,2] + j[4,2])))#extract and calculate the actual heritability for each table
 
 #make a final table with the traits and calculated heritability
@@ -422,15 +422,14 @@ for( i in 1:length(genotypes)){
   print(pvalue)
 }
 
-##### Heritability                              ########################### Double check this is right with jason
+##### Heritability                          
 myvars <- as.list(colnames(Serendip_data[5:8]))  # create a list of traits
 
 
 # use lapply to loop through columns and create linear models. evale paste0 makes the variable work somehow
 linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~Genotype*Condition')), data = Serendip_data) 
                  %>% anova()) 
-#%>% tidy()) 
-#calcs <- lapply(linreg, function(j)(j[3,3]/sum(j[3]))) #this is incorrect
+
 calcs <- lapply(linreg, function(j)(j[3,2]/(j[3,2] + j[4,2])))#extract and calculate the actual heritability for each table
 
 #make a final table with the traits and calculated heritability
@@ -443,7 +442,6 @@ print(final.table)
 ##### Variance decomposition analysis - ANOVA type I
 SereResultsT1 <- data.frame(PlantHeight=numeric(5),RootLength=numeric(5),RootMass=numeric(5),ShootMass=numeric(5))
 rownames(SereResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
-# Trying to loop through it with lapply was taking too long. Long way
 
 SerePlantHeightLM <- lm(PlantHeight ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
 HPH1 <- anova(SerePlantHeightLM)
@@ -490,7 +488,7 @@ SandH <- rbind(SereT1_long, HerbT1_long)
 ggplot(SandH, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), label = Signif)) + geom_col(position=position_stack()) + theme(axis.text.x = element_text( size = 12)) + theme(axis.text.y = element_text(size = 14)) + labs(fill = "Variables") + geom_text(aes(label = Signif), size = 5, position = position_stack(vjust = .5))+ ggtitle("Variance Decomposition Analysis") + xlab("Growth Promoted Phenotypes") + coord_flip() 
 
 ###################################################################################################
-# Real Time - qPCR      dataset still contains B97 and MOsomething
+# Real Time - qPCR    
 ###################################################################################################
 # Note: each sample had 2 technical reps! Experiment 3 had a different dna concentration due to differences in 
 # extracted DNA concnetrations. (they were too low compared to exps 1 and 2)
@@ -524,7 +522,7 @@ for( i in 1:length(qgenotypes)){
 #Add experiments so we can fill by them
 doubledelta_df['Experiment_Number'] <- c('3','3','3','1','3','2','1','2','1','1','1','3')
 
-# Drop CML69 and MO18W - we have no phenotype data due to greenhouse fertilization
+# Drop CML69 and MO18W - we have no phenotype data due to greenhouse fertilization by a worker
 doubledelta_df <- doubledelta_df[!(doubledelta_df$Genotype=="CML69"),]
 doubledelta_df <- doubledelta_df[!(doubledelta_df$Genotype=="MO18W"),]
 
@@ -534,7 +532,7 @@ ggplot(doubledelta_df, aes(Genotype, Double_Delta, fill = Experiment_Number)) + 
 # Transform to fold change
 foldchange_df = transform(doubledelta_df, Double_Delta = log2(-Double_Delta))
 
-# Add phenotype significance from t - tests .09 - .05
+# Add phenotype significance from t - tests .1 - .05
 foldchange_df['Significance'] <- c('*',' ',' ',' ','***','*',' ','***','***','***')
 
 #Graph fold change
@@ -558,4 +556,3 @@ for( i in 1:length(genotypes)){
 qpcrFinModel <- lm(qpcr_delta1$calcs~ qpcr_delta1$Genotype*qpcr_delta1$Condition, data=qpcr_delta1)
 qPCRFintab <- anova(qpcrFinModel)
 colonizationFinal.het <- qPCRFintab[3,2]/(qPCRFintab[3,2] + qPCRFintab[4,2])
-
