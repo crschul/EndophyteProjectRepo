@@ -115,11 +115,10 @@ myvars <- as.list(colnames(Herb_data[5:11]))  # create a list of traits
 
 
 # use lapply to loop through columns and create linear models. evale paste0 makes the variable work somehow
-linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~Genotype*Condition')), data = Herb_data) 
+linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~ Rep + Genotype + Condition + Genotype:Condition')), data = Herb_data) 
                  %>% anova()) 
-                 #%>% tidy()) 
-#calcs <- lapply(linreg, function(j)(j[3,3]/sum(j[3]))) #this is incorrect
-calcs <- lapply(linreg, function(j)(j[3,2]/(j[3,2] + j[4,2])))#extract and calculate the actual heritability for each table
+
+calcs <- lapply(linreg, function(j)(j[4,2]/(j[4,2] + j[5,2])))#extract and calculate the actual heritability for each table
 
 #make a final table with the traits and calculated heritability
 final.table <- cbind(((colnames(Herb_data[5:11]))),as.data.frame(do.call(rbind, calcs)))
@@ -153,7 +152,7 @@ HerbResultsT1$Chlorophyll2 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2
 linereg <- lm(Chlorophyll3 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
 HPH1 <- anova(linereg)
 HerbResultsT1$Chlorophyll3 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
-
+  
 linereg <- lm(LeafArea ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
 HPH1 <- anova(linereg)
 HerbResultsT1$LeafArea <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
@@ -181,7 +180,7 @@ HerbT1_long$Signif <- c("*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", "*"
 
 F1 <- ggplot(HerbT1_long, aes(x = HerbT1, y = value, fill = forcats::fct_rev(rn), label = Signif)) + geom_col(position=position_stack()) + theme(axis.text.x = element_text(angle = 90)) + labs(fill = "Variables") + geom_text(aes(label = Signif), size = 5, position = position_stack(vjust = .5)) + ggtitle("Variance Decomposition Analysis: Herbaspirillum") + xlab("Growth Promoted Phenotypes")
 
-
+F1
 
 ##### Variance Decomposition Analysis - using type 2 ANOVA
 # signifigance is just the left column of the ANOVA duh you big dummy. 
@@ -294,11 +293,10 @@ myvars <- as.list(colnames(Burk_data[5:8]))  # create a list of traits
 
 
 # use lapply to loop through columns and create linear models. evale paste0 makes the variable work somehow
-linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~Genotype*Condition')), data = Burk_data) 
+linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~ Rep + Genotype + Condition + Genotype:Condition')), data = Burk_data) 
                  %>% anova()) 
-#%>% tidy()) 
 
-calcs <- lapply(linreg, function(j)(j[3,2]/(j[3,2] + j[4,2])))#extract and calculate the actual heritability for each table
+calcs <- lapply(linreg, function(j)(j[4,2]/(j[4,2] + j[5,2])))#extract and calculate the actual heritability for each table
 
 #make a final table with the traits and calculated heritability
 final.table <- cbind(((colnames(Burk_data[5:8]))),as.data.frame(do.call(rbind, calcs)))
@@ -427,10 +425,10 @@ myvars <- as.list(colnames(Serendip_data[5:8]))  # create a list of traits
 
 
 # use lapply to loop through columns and create linear models. evale paste0 makes the variable work somehow
-linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~Genotype*Condition')), data = Serendip_data) 
+linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~ Rep + Genotype + Condition + Genotype:Condition')), data = Serendip_data) 
                  %>% anova()) 
 
-calcs <- lapply(linreg, function(j)(j[3,2]/(j[3,2] + j[4,2])))#extract and calculate the actual heritability for each table
+calcs <- lapply(linreg, function(j)(j[4,2]/(j[4,2] + j[5,2])))#extract and calculate the actual heritability for each table
 
 #make a final table with the traits and calculated heritability
 final.table <- cbind(((colnames(Serendip_data[5:8]))),as.data.frame(do.call(rbind, calcs)))
