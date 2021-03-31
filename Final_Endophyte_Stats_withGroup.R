@@ -34,7 +34,7 @@ data_summary <- function(data, varname, groupnames){
 ##########################################################################################
 
 names(Herb_data) <- c("Genotype", "Condition", "Rep", "Endophyte","Chlorophyll1","Chlorophyll2","Chlorophyll3",
-                      "PlantHeight","LeafArea","RootLength","RootVolume")
+                      "PlantHeight","LeafArea","RootLength","RootVolume","Group_or_Date")
 
 
 ##### Visualize Phenotypes - use these two lines to make any histograms
@@ -115,10 +115,10 @@ myvars <- as.list(colnames(Herb_data[5:11]))  # create a list of traits
 
 
 # use lapply to loop through columns and create linear models. evale paste0 makes the variable work somehow
-linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~ Rep + Genotype + Condition + Genotype:Condition')), data = Herb_data) 
+linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition')), data = Herb_data) 
                  %>% anova()) 
 
-calcs <- lapply(linreg, function(j)(j[4,2]/(j[4,2] + j[5,2])))#extract and calculate the actual heritability for each table
+calcs <- lapply(linreg, function(j)(j[5,2]/(j[5,2] + j[6,2])))#extract and calculate the actual heritability for each table
 
 #make a final table with the traits and calculated heritability
 final.table <- cbind(((colnames(Herb_data[5:11]))),as.data.frame(do.call(rbind, calcs)))
@@ -132,38 +132,69 @@ height3model <- lm(Herb_data$PlantHeight ~ Herb_data$Genotype*Herb_data$Conditio
 height3tab <- anova(height3model)
 height3.het <- height3tab[3,2]/(height3tab[3,2] + height3tab[4,2])  #Heritability Calculation
 height3.het
-##### Variance Decomposition Analysis - using type 1 ANOVA
+##### Variance Decomposition Analysis - using type 1 ANOVA - loop below to handle signifigance values. 
 
-HerbResultsT1 <- data.frame(Chlorophyll1=numeric(5),Chlorophyll2=numeric(5),Chlorophyll3=numeric(5),PlantHeight=numeric(5),LeafArea=numeric(5),RootLength=numeric(5),RootVolume=numeric(5))
-rownames(HerbResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
+HerbResultsT1 <- data.frame(Chlorophyll1=numeric(6),Chlorophyll2=numeric(6),Chlorophyll3=numeric(6),PlantHeight=numeric(6),LeafArea=numeric(6),RootLength=numeric(6),RootVolume=numeric(6))
+rownames(HerbResultsT1) <- c("Rep","Group","Genotype","Inoculation","Genotype:Inoculation","Residuals")
 
-HerbPlantHeightLM <- lm(PlantHeight ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+HerbPlantHeightLM <- lm(PlantHeight ~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition, data=Herb_data)
 HPH1 <- anova(HerbPlantHeightLM)
-HerbResultsT1$PlantHeight <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+HerbResultsT1$PlantHeight <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2],HPH1[6,2])
 
-HerbChl1LM <- lm(Chlorophyll1 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+HerbChl1LM <- lm(Chlorophyll1 ~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition, data=Herb_data)
 HPH1 <- anova(HerbChl1LM)
-HerbResultsT1$Chlorophyll1 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+HerbResultsT1$Chlorophyll1 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2],HPH1[6,2])
 
-linereg <- lm(Chlorophyll2 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+linereg <- lm(Chlorophyll2 ~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition, data=Herb_data)
 HPH1 <- anova(linereg)
-HerbResultsT1$Chlorophyll2 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+HerbResultsT1$Chlorophyll2 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2],HPH1[6,2])
 
-linereg <- lm(Chlorophyll3 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+linereg <- lm(Chlorophyll3 ~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition, data=Herb_data)
 HPH1 <- anova(linereg)
-HerbResultsT1$Chlorophyll3 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
-  
-linereg <- lm(LeafArea ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
-HPH1 <- anova(linereg)
-HerbResultsT1$LeafArea <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+HerbResultsT1$Chlorophyll3 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2],HPH1[6,2])
 
-linereg <- lm(RootLength ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+linereg <- lm(LeafArea ~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition, data=Herb_data)
 HPH1 <- anova(linereg)
-HerbResultsT1$RootLength <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+HerbResultsT1$LeafArea <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2],HPH1[6,2])
 
-linereg <- lm(RootVolume ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+linereg <- lm(RootLength ~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition, data=Herb_data)
 HPH1 <- anova(linereg)
-HerbResultsT1$RootVolume <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+HerbResultsT1$RootLength <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2],HPH1[6,2])
+
+linereg <- lm(RootVolume ~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition, data=Herb_data)
+HPH1 <- anova(linereg)
+HerbResultsT1$RootVolume <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2],HPH1[6,2])
+
+# Sum of Squares analysis loop
+myvars <- names(Herb_data[5:11]) # create a list of traits
+Signif_list <- list()
+
+for( m in myvars){
+  print(m)
+  print(as.name(m))
+  linmod <- lm(Herb_data[[m]] ~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition, data = Herb_data)
+  HPH1 <- anova(linmod)
+  HerbResultsT1[[m]] <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2],HPH1[6,2])
+  itlist = HPH1[,5]
+  Signif_list <- append(Signif_list, itlist)
+}
+
+#Get rid of the NAs from residuals
+Signif_list[is.na(Signif_list)] = 1
+Signif_list
+
+# Convert these p values to *
+for( s in 1:length(Signif_list)){
+  #print(s)
+  if (Signif_list[s] < .05){
+    Signif_list[s] <- '*'
+    #print("True")
+  } else {
+    Signif_list[s] <- " "
+    #print("False")
+  }
+}
+Signif_list
 
 # Now Normalize all the columns
 HerbT1 <- HerbResultsT1
@@ -174,10 +205,12 @@ setDT(HerbT1, keep.rownames = TRUE)[]
 HerbT1_long <- HerbT1 %>%
   gather(HerbT1, value,Chlorophyll1:RootVolume)
 
+HerbT1_long$Signif <- Signif_list
 
-HerbT1_long$Signif <- c("*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", "*", " ", " ", " ","*", " ", "*", " ", " ","*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", " ", " ", "*", " ")
+#HerbT1_long$Signif <- c("*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", "*", " ", " ", " ","*", " ", "*", " ", " ","*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", " ", " ", "*", " ")
 
 
+#F1 <- ggplot(HerbT1_long, aes(x = HerbT1, y = value, fill = forcats::fct_rev(rn))) + geom_col(position=position_stack()) + theme(axis.text.x = element_text(angle = 90)) + labs(fill = "Variables") + ggtitle("Variance Decomposition Analysis: Herbaspirillum") + xlab("Growth Promoted Phenotypes")
 F1 <- ggplot(HerbT1_long, aes(x = HerbT1, y = value, fill = forcats::fct_rev(rn), label = Signif)) + geom_col(position=position_stack()) + theme(axis.text.x = element_text(angle = 90)) + labs(fill = "Variables") + geom_text(aes(label = Signif), size = 5, position = position_stack(vjust = .5)) + ggtitle("Variance Decomposition Analysis: Herbaspirillum") + xlab("Growth Promoted Phenotypes")
 
 F1
@@ -209,7 +242,7 @@ linereg <- lm(LeafArea ~ Genotype +Condition + Rep + Genotype*Condition, data=He
 HPH2 <- Anova(linereg, type = "II")
 HerbResultsT2$LeafArea=c(HPH2[1,1],HPH2[2,1],HPH2[3,1],HPH2[4,1],HPH2[5,1])
 
-linereg <- lm(RootLength ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+linereg <- lm(RootLenth ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
 HPH2 <- Anova(linereg, type = "II")
 HerbResultsT2$RootLength=c(HPH2[1,1],HPH2[2,1],HPH2[3,1],HPH2[4,1],HPH2[5,1])
 
@@ -321,7 +354,7 @@ height3.het
 ##########################################################################################
 
 names(Serendip_data) <- c("Genotype", "Condition", "Rep", "Endophyte",
-                      "PlantHeight","RootLength","RootMass","ShootMass")
+                          "PlantHeight","RootLength","RootMass","ShootMass")
 
 
 ##### Visualize Phenotypes - use these two lines to make any histograms
@@ -367,20 +400,15 @@ dot_df$Condition <- gsub('C', 'Control', dot_df$Condition)
 dot_df$Condition <- gsub('I', 'Inoculated', dot_df$Condition)
 
 # Root Mass  
-ggplot(Serendip_data, aes(x =Genotype, y=RootMass, group = Condition, fill = Condition)) + 
+ggplot(dot_df, aes(x =Genotype, y=RootMass, group = Condition, fill = Condition)) + 
   geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-   scale_color_manual(values = c( "tan3", "forestgreen")) + ylab(" Root Mass (mg)") + 
-  theme(axis.text.x = element_text( size = 20), axis.title.x = element_text(size = 16)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  ggtitle("Serendipita Root Mass")
+  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab(" Root Mass (mg)") + theme(axis.text.x = element_text( size = 20), axis.title.x = element_text(size = 16)) + theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + ggtitle("Serendipita Root Mass")
 
 
 # Shoot Mass  
 ggplot(dot_df, aes(x =Genotype, y=ShootMass, group = Condition, fill = Condition)) + 
   geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
   scale_color_manual(values = c( "tan3", "forestgreen")) + ylab(" Shoot Mass (mg)") + theme(axis.text.x = element_text( size = 20), axis.title.x = element_text(size = 16)) + theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + ggtitle("Serendipita Shoot Mass")
-
-
 
 ##########################################################
 ##### T tests for all phenotypes
@@ -407,7 +435,7 @@ for( i in 1:length(genotypes)){
   print(pvalue)
 }
 
-  #Root Mass
+#Root Mass
 for( i in 1:length(genotypes)){
   df <-Serendip_data[which (Serendip_data$Genotype == (unique(Serendip_data$Genotype)[i])),c(1:8)]
   pvalue <- t.test(df$RootMass~df$Condition,mu=0, alt="two.sided", conf=0.95, var.eq=F, paired=F)
@@ -425,24 +453,93 @@ for( i in 1:length(genotypes)){
   print(pvalue)
 }
 
-##### Heritability                          
+##### Heritability  - Test with other ANOVA's       
 myvars <- as.list(colnames(Serendip_data[5:8]))  # create a list of traits
-
-
+# Type 1
 # use lapply to loop through columns and create linear models. evale paste0 makes the variable work somehow
-linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~ Rep + Genotype + Condition + Genotype:Condition')), data = Serendip_data) 
+linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition')), data = Serendip_data) 
                  %>% anova()) 
-
-calcs <- lapply(linreg, function(j)(j[4,2]/(j[4,2] + j[5,2])))#extract and calculate the actual heritability for each table
-
+calcs <- lapply(linreg, function(j)(j[5,2]/(j[5,2] + j[6,2])))#extract and calculate the actual heritability for each table
 #make a final table with the traits and calculated heritability
 final.table <- cbind(((colnames(Serendip_data[5:8]))),as.data.frame(do.call(rbind, calcs)))
 names(final.table) <- c("Trait", "Heritability")
 
 print(final.table)
 
+# Type II
+linreg2 <- lapply(myvars, function(x)lm(eval(paste0(x, '~ Rep + Genotype + Condition + Genotype:Condition')), data = Serendip_data) 
+                 %>% Anova(type="II")) 
+lapply(linreg2, function(j)print(j))
+calcs2 <- lapply(linreg2, function(j)(j[4,1]/(j[4,1] + j[5,1])))#extract and calculate the actual heritability for each table
+#make a final table with the traits and calculated heritability
+final.table2 <- cbind(((colnames(Serendip_data[5:8]))),as.data.frame(do.call(rbind, calcs2)))
+names(final.table2) <- c("Trait", "Heritability")
 
+print(final.table2)
+
+# Type III
+linreg3 <- lapply(myvars, function(x)lm(eval(paste0(x, '~ Rep + Genotype + Condition + Genotype:Condition')), data = Serendip_data) 
+                 %>% Anova(type="III")) 
+calcs3 <- lapply(linreg3, function(j)(j[5,1]/(j[5,1] + j[6,1])))#extract and calculate the actual heritability for each table
+#make a final table with the traits and calculated heritability
+final.table3 <- cbind(((colnames(Serendip_data[5:8]))),as.data.frame(do.call(rbind, calcs3)))
+names(final.table3) <- c("Trait", "Heritability")
+
+print(final.table3)
 ##### Variance decomposition analysis - ANOVA type I
+# Sum of Squares analysis loop
+SereResultsT1 <- data.frame(PlantHeight=numeric(6),RootLength=numeric(6),RootMass=numeric(6),ShootMass=numeric(6))
+rownames(SereResultsT1) <- c("Rep","Group","Genotype","Inoculation","Genotype:Inoculation","Residuals")
+
+myvars <- names(Serendip_data[5:8]) # create a list of traits
+Signif_list <- list()
+
+for( m in myvars){
+  print(m)
+  print(as.name(m))
+  linmod <- lm(Serendip_data[[m]] ~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition, data = Serendip_data)
+  HPH1 <- anova(linmod)
+  SereResultsT1[[m]] <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2],HPH1[6,2])
+  itlist = HPH1[,5]
+  Signif_list <- append(Signif_list, itlist)
+}
+
+#Get rid of the NAs from residuals
+Signif_list[is.na(Signif_list)] = 1
+Signif_list
+
+# Convert these p values to *
+for( s in 1:length(Signif_list)){
+  #print(s)
+  if (Signif_list[s] < .05){
+    Signif_list[s] <- '*'
+    #print("True")
+  } else {
+    Signif_list[s] <- " "
+    #print("False")
+  }
+}
+Signif_list
+
+# Now Normalize all the columns
+HerbT1 <- SereResultsT1
+
+HerbT1[] <- lapply(HerbT1[], function(x) x/sum(x))
+setDT(HerbT1, keep.rownames = TRUE)[]
+
+HerbT1_long <- HerbT1 %>%
+  gather(HerbT1, value,PlantHeight:ShootMass)
+
+HerbT1_long$Signif <- Signif_list
+
+#HerbT1_long$Signif <- c("*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", "*", " ", " ", " ","*", " ", "*", " ", " ","*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", " ", " ", "*", " ")
+
+
+#F1 <- ggplot(HerbT1_long, aes(x = HerbT1, y = value, fill = forcats::fct_rev(rn))) + geom_col(position=position_stack()) + theme(axis.text.x = element_text(angle = 90)) + labs(fill = "Variables") + ggtitle("Variance Decomposition Analysis: Herbaspirillum") + xlab("Growth Promoted Phenotypes")
+F1 <- ggplot(HerbT1_long, aes(x = HerbT1, y = value, fill = forcats::fct_rev(rn), label = Signif)) + geom_col(position=position_stack()) + theme(axis.text.x = element_text(angle = 90)) + labs(fill = "Variables") + geom_text(aes(label = Signif), size = 5, position = position_stack(vjust = .5)) + ggtitle("Variance Decomposition Analysis: Serendipita") + xlab("Growth Promoted Phenotypes")
+
+F1
+############ Non looped way without date
 SereResultsT1 <- data.frame(PlantHeight=numeric(5),RootLength=numeric(5),RootMass=numeric(5),ShootMass=numeric(5))
 rownames(SereResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
 
@@ -486,7 +583,7 @@ HerbT1_long$HerbT1 <- paste("Herbaspirillum", HerbT1_long$HerbT1, sep="_")
 
 names(SereT1_long)[names(SereT1_long) == "SereT1"] <- "Phenotype"
 names(HerbT1_long)[names(HerbT1_long) == "HerbT1"] <- "Phenotype"
- 
+
 SandH <- rbind(SereT1_long, HerbT1_long)
 ggplot(SandH, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), label = Signif)) + geom_col(position=position_stack()) + theme(axis.text.x = element_text( size = 12)) + theme(axis.text.y = element_text(size = 14)) + labs(fill = "Variables") + geom_text(aes(label = Signif), size = 5, position = position_stack(vjust = .5))+ ggtitle("Variance Decomposition Analysis") + xlab("Growth Promoted Phenotypes") + coord_flip() 
 
@@ -559,156 +656,3 @@ for( i in 1:length(genotypes)){
 qpcrFinModel <- lm(qpcr_delta1$calcs~ qpcr_delta1$Genotype*qpcr_delta1$Condition, data=qpcr_delta1)
 qPCRFintab <- anova(qpcrFinModel)
 colonizationFinal.het <- qPCRFintab[3,2]/(qPCRFintab[3,2] + qPCRFintab[4,2])
-
-
-
-###################################### Plotting for final manuscripts
-Serendip_data$Condition <- gsub('C', 'Control', Serendip_data$Condition)
-Serendip_data$Condition <- gsub('I', 'Inoculated', Serendip_data$Condition)
-colnames(Serendip_data)
-
-# Height
-ggplot(Serendip_data, aes(x =Genotype, y=PlantHeight, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Plant Height (cm)") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Serendipita Plant Height")
-
-# Root Length
-ggplot(Serendip_data, aes(x =Genotype, y=RootLength, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Root Length (cm)") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Serendipita Root Length")
-
-# Shoot Mass  
-ggplot(Serendip_data, aes(x =Genotype, y=ShootMass, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab(" Shoot Mass (mg)") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Serendipita Shoot Mass")
-
-# Root Mass  
-ggplot(Serendip_data, aes(x =Genotype, y=RootMass, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab(" Root Mass (mg)") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Serendipita Root Mass")
-
-################ Herb pics
-Herb_data$Condition <- gsub('C', 'Control', Herb_data$Condition)
-Herb_data$Condition <- gsub('I', 'Inoculated', Herb_data$Condition)
-colnames(Herb_data)
-
-# Chlorophyll1
-ggplot(Herb_data, aes(x =Genotype, y=Chlorophyll1, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Quantum Yield") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Herbaspirillum Chlorophyll 1 Content")
-
-# Chlorophyll2
-ggplot(Herb_data, aes(x =Genotype, y=Chlorophyll2, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Quantum Yield") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Herbaspirillum Chlorophyll 2 Content")
-
-# Chlorophyll3
-ggplot(Herb_data, aes(x =Genotype, y=Chlorophyll3, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Quantum Yield") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Herbaspirillum Chlorophyll 3 Content")
-
-# Plant Height
-ggplot(Herb_data, aes(x =Genotype, y=PlantHeight, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Plant Height (cm)") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Herbaspirillum Plant Height")
-
-# Leaf Area
-ggplot(Herb_data, aes(x =Genotype, y=LeafArea, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Leaf Area (cm)") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Herbaspirillum Leaf Area")
-
-# Root Length
-ggplot(Herb_data, aes(x =Genotype, y=RootLength, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Root Length (cm)") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Herbaspirillum Root Length")
-
-# Root Volume
-ggplot(Herb_data, aes(x =Genotype, y=RootVolume, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Root Volume (mL)") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Herbaspirillum Root Volume")
-
-
-####### Burkholderia Pics
-Burk_data$Condition <- gsub('C', 'Control', Burk_data$Condition)
-Burk_data$Condition <- gsub('I', 'Inoculated', Burk_data$Condition)
-colnames(Burk_data)
-
-# Plant Height
-ggplot(Burk_data, aes(x =Genotype, y=PlantHeight, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Plant Height (cm)") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Burkholderia Plant Height")
-
-# Leaf Area
-ggplot(Burk_data, aes(x =Genotype, y=LeafArea, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Leaf Area (cm)") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Burkholderia Leaf Area")
-
-# Root Length
-ggplot(Burk_data, aes(x =Genotype, y=RootLength, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Root Length (cm)") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Burkholderia Root Length")
-
-# Root Volume
-ggplot(Burk_data, aes(x =Genotype, y=RootVolume, group = Condition, fill = Condition)) + 
-  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
-  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab("Root Volume (mL)") + 
-  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Burkholderia Root Volume")
