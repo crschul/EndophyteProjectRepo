@@ -963,7 +963,7 @@ ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fi
 ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fill = Grow_Number, label = Significance)) + 
   geom_bar(stat = "summary", fun = "mean", position="dodge") + 
   theme(plot.title = element_text(size=18),axis.text.x = element_text(size=18, angle = 90), axis.text.y = element_text(size=18), axis.title = element_text(size = 18)) + 
-  scale_fill_manual(values = c("dodgerblue", "orange")) + 
+  scale_fill_manual(values = c("#56B4E9", "tan3")) + 
   ggtitle("Differences in Serendipita Abundance by Genotype") + xlab("Genotype") + 
   ylab("Foldchange Fungal Abundance") + geom_text(aes(label = Significance), size = 5, position = position_stack(vjust = .5)) + 
   annotate("text", x = 3, y = 5, size=5, label = " P-Values for a phenotype less than:\n * = 0.1,    *** = 0.05 ") +
