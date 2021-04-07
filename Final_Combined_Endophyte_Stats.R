@@ -495,7 +495,7 @@ ggplot(SandH, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), label =
 ###################################################################################################
 # Note: each sample had 2 technical reps! Experiment 3 had a different dna concentration due to differences in 
 # extracted DNA concnetrations. (they were too low compared to exps 1 and 2)
-
+library(Rmisc)
 qpcr_data <- read.csv("CombinedRaw_qPCR_clean.csv", header = TRUE, sep = ",")
 # Toss any rows with missing values
 qpcr_data = qpcr_data[complete.cases(qpcr_data),]
@@ -523,7 +523,7 @@ for( i in 1:length(qgenotypes)){
 }
 
 #Add experiments so we can fill by them
-doubledelta_df['Experiment_Number'] <- c('3','3','3','1','3','2','1','2','1','1','1','3')
+doubledelta_df['Grow_Number'] <- c('3','3','3','1','3','2','1','2','1','1','1','3')
 
 # Drop CML69 and MO18W - we have no phenotype data due to greenhouse fertilization by a worker
 doubledelta_df <- doubledelta_df[!(doubledelta_df$Genotype=="CML69"),]
@@ -541,7 +541,7 @@ foldchange_df['Significance'] <- c('*',' ',' ',' ','***','*',' ','***','***','**
 #Graph fold change
 #ggplot(foldchange_df, aes(Genotype, Double_Delta, fill = Experiment_Number)) + geom_bar(stat = "summary", fun = "mean", position="dodge") + theme(axis.text.x = element_text(size=12)) + scale_fill_manual(values = c("slateblue4", "slategrey", "indianred3")) + ggtitle("Expression Change of Serendipita Inoculation by Genotype")
 
-ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fill = Experiment_Number, label = Significance)) + geom_bar(stat = "summary", fun = "mean", position="dodge") + theme(plot.title = element_text(size=18),axis.text.x = element_text(size=18), axis.text.y = element_text(size=18), axis.title = element_text(size = 18)) + scale_fill_manual(values = c("dodgerblue", "orange")) + ggtitle("Expression Change of Serendipita Inoculation by Genotype") + xlab("Genotype") + ylab("2^Double_Delta") + geom_text(aes(label = Significance), size = 5, position = position_stack(vjust = .5)) + annotate("text", x = 8, y = 3.5, size=5, label = " P-Values for a phenotype less than:\n * = 0.1,    *** = 0.05 ") 
+ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fill = Grow_Number, label = Significance)) + geom_bar(stat = "summary", fun = "mean", position="dodge") + theme(plot.title = element_text(size=18),axis.text.x = element_text(size=18), axis.text.y = element_text(size=18), axis.title = element_text(size = 18)) + scale_fill_manual(values = c("dodgerblue", "orange")) + ggtitle("Expression Change of Serendipita Inoculation by Genotype") + xlab("Genotype") + ylab("2^Double_Delta") + geom_text(aes(label = Significance), size = 5, position = position_stack(vjust = .5)) + annotate("text", x = 8, y = 3.5, size=5, label = " P-Values for a phenotype less than:\n * = 0.1,    *** = 0.05 ") 
 
 # T Test comparing inoculated and control single delta values. 
 genotypes <- unique(qpcr_delta1$Genotype)
@@ -563,6 +563,8 @@ colonizationFinal.het <- qPCRFintab[3,2]/(qPCRFintab[3,2] + qPCRFintab[4,2])
 
 
 ###################################### Plotting for final manuscripts
+library(ggpubr)
+
 Serendip_data$Condition <- gsub('C', 'Control', Serendip_data$Condition)
 Serendip_data$Condition <- gsub('I', 'Inoculated', Serendip_data$Condition)
 colnames(Serendip_data)
@@ -586,13 +588,39 @@ ggplot(Serendip_data, aes(x =Genotype, y=RootLength, group = Condition, fill = C
   ggtitle("Serendipita Root Length")
 
 # Shoot Mass  
-ggplot(Serendip_data, aes(x =Genotype, y=ShootMass, group = Condition, fill = Condition)) + 
+# Significance on Genotype
+Fig2A_below <- ggplot(Serendip_data, aes(x =Genotype, y=ShootMass, group = Condition, fill = Condition)) + 
   geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
   scale_color_manual(values = c( "tan3", "forestgreen")) + ylab(" Shoot Mass (mg)") + 
   theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
   theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
   theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Serendipita Shoot Mass")
+  ggtitle("Serendipita Shoot Mass") + theme(panel.background = element_rect(fill = "white",
+                                                                            colour = "white"), 
+                                            panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                                                            colour = "light grey"), 
+                                            panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                                                            colour = "light grey")) +
+  scale_x_discrete(labels = c("A635", "B73","B97", "CML103","CML333","CML52","KI11","KI3", "MS71","*NC350","*P39","*TX303")) +
+  annotate("text", x = 10, y = 1100, label = " * represent t-test pvalue < .05")
+
+# Significance on top of Graph
+Fig2A_above <- ggplot(Serendip_data, aes(x =Genotype, y=ShootMass, group = Condition, fill = Condition)) + 
+  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
+  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab(" Shoot Mass (mg)") + 
+  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
+  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
+  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
+  ggtitle("Serendipita Shoot Mass") + theme(panel.background = element_rect(fill = "white",
+                                                                            colour = "white"), 
+                                            panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                                                            colour = "light grey"), 
+                                            panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                                                            colour = "light grey")) +
+  annotate("text", x = 10, y = 1100, label = " * represent t-test pvalue < .05") +
+  annotate("text", x = 10, y = 1400, label = " * ", size = 18) + 
+  annotate("text", x = 11, y = 1400, label = " * ", size = 18) +
+  annotate("text", x = 12, y = 1400, label = " * ", size = 18) 
 
 # Root Mass  
 ggplot(Serendip_data, aes(x =Genotype, y=RootMass, group = Condition, fill = Condition)) + 
@@ -601,7 +629,12 @@ ggplot(Serendip_data, aes(x =Genotype, y=RootMass, group = Condition, fill = Con
   theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
   theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
   theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
-  ggtitle("Serendipita Root Mass")
+  ggtitle("Serendipita Root Mass") + theme(panel.background = element_rect(fill = "white",
+                                                                           colour = "white"), 
+                                           panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                                                           colour = "light grey"), 
+                                           panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                                                           colour = "light grey"))
 
 ################ Herb pics
 Herb_data$Condition <- gsub('C', 'Control', Herb_data$Condition)
@@ -712,3 +745,258 @@ ggplot(Burk_data, aes(x =Genotype, y=RootVolume, group = Condition, fill = Condi
   theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
   theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
   ggtitle("Burkholderia Root Volume")
+
+############################################################################## Plotting the final Figures
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+# Adding Signif to Serendip data
+Serendip_data
+
+
+# Figure 2
+Serendip_data$Condition <- gsub('C', 'Control', Serendip_data$Condition)
+Serendip_data$Condition <- gsub('I', 'Inoculated', Serendip_data$Condition)
+
+Fig2A_above <- ggplot(Serendip_data, aes(x =Genotype, y=ShootMass, group = Condition, fill = Condition)) + 
+  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
+  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab(" Shoot Mass (mg)") + 
+  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
+  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
+  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
+  ggtitle("Serendipita Shoot Mass") + theme(panel.background = element_rect(fill = "white",
+                                                                            colour = "white"), 
+                                            panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                                                            colour = "light grey"), 
+                                            panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                                                            colour = "light grey")) +
+  annotate("text", x = 10, y = 1100, label = " * represent t-test pvalue < .05") +
+  annotate("text", x = 10, y = 400, label = " * ", size = 10) + 
+  annotate("text", x = 11, y = 400, label = " * ", size = 10) +
+  annotate("text", x = 12, y = 750, label = " * ", size = 10) 
+Fig2A_above
+
+Fig2B_above <- ggplot(Serendip_data, aes(x =Genotype, y=RootMass, group = Condition, fill = Condition)) + 
+  geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
+  scale_color_manual(values = c( "tan3", "forestgreen")) + ylab(" Root Mass (mg)") + 
+  theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
+  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
+  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
+  ggtitle("Serendipita Root Mass") + theme(panel.background = element_rect(fill = "white",
+                                                                            colour = "white"), 
+                                            panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                                                            colour = "light grey"), 
+                                            panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                                                            colour = "light grey")) +
+  annotate("text", x = 10, y = 525, label = " * represent t-test pvalue < .05") +
+  annotate("text", x = 6, y = 500, label = " * ", size = 10) + 
+  annotate("text", x = 11, y = 250, label = " * ", size = 10) 
+Fig2B_above
+
+# Fig 3 - Sum Square analysis
+# Herb data
+HerbResultsT1 <- data.frame(Chlorophyll1=numeric(5),Chlorophyll2=numeric(5),Chlorophyll3=numeric(5),PlantHeight=numeric(5),LeafArea=numeric(5),RootLength=numeric(5),RootVolume=numeric(5))
+rownames(HerbResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
+
+HerbPlantHeightLM <- lm(PlantHeight ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+HPH1 <- anova(HerbPlantHeightLM)
+HerbResultsT1$PlantHeight <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+HerbChl1LM <- lm(Chlorophyll1 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+HPH1 <- anova(HerbChl1LM)
+HerbResultsT1$Chlorophyll1 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+linereg <- lm(Chlorophyll2 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+HPH1 <- anova(linereg)
+HerbResultsT1$Chlorophyll2 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+linereg <- lm(Chlorophyll3 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+HPH1 <- anova(linereg)
+HerbResultsT1$Chlorophyll3 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+linereg <- lm(LeafArea ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+HPH1 <- anova(linereg)
+HerbResultsT1$LeafArea <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+linereg <- lm(RootLength ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+HPH1 <- anova(linereg)
+HerbResultsT1$RootLength <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+linereg <- lm(RootVolume ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+HPH1 <- anova(linereg)
+HerbResultsT1$RootVolume <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+# Now Normalize all the columns
+HerbT1 <- HerbResultsT1
+
+HerbT1[] <- lapply(HerbT1[], function(x) x/sum(x))
+setDT(HerbT1, keep.rownames = TRUE)[]
+
+HerbT1_long <- HerbT1 %>%
+  gather(HerbT1, value,Chlorophyll1:RootVolume)
+
+
+HerbT1_long$Signif <- c("*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", "*", " ", " ", " ","*", " ", "*", " ", " ","*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", " ", " ", "*", " ")
+
+HerbT1_long
+
+# burk data
+burkResultsT1 <- data.frame(PlantHeight=numeric(5),LeafArea=numeric(5),RootLength=numeric(5),RootVolume=numeric(5))
+rownames(burkResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
+
+SerePlantHeightLM <- lm(PlantHeight ~ Genotype +Condition + Rep + Genotype*Condition, data=Burk_data)
+HPH1 <- anova(SerePlantHeightLM)
+burkResultsT1$PlantHeight <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+linereg <- lm(LeafArea ~ Genotype +Condition + Rep + Genotype*Condition, data=Burk_data)
+HPH1 <- anova(linereg)
+burkResultsT1$LeafArea <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+linereg <- lm(RootLength ~ Genotype +Condition + Rep + Genotype*Condition, data=Burk_data)
+HPH1 <- anova(linereg)
+burkResultsT1$RootLength <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+linereg <- lm(RootVolume ~ Genotype +Condition + Rep + Genotype*Condition, data=Burk_data)
+HPH1 <- anova(linereg)
+burkResultsT1$RootVolume <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+# Now Normalize all the columns
+burkT1 <- burkResultsT1
+
+burkT1[] <- lapply(burkT1[], function(x) x/sum(x))
+
+setDT(burkT1, keep.rownames = TRUE)[]
+
+burkT1_long <- burkT1 %>%
+  gather(burkT1, value,PlantHeight:RootVolume)
+
+burkT1_long$Signif <- c("*", " ", " ", " "," ", "*", " ", " ","*", " ", "*", " "," ", " ", " ", "*"," ", "*", " ", " ")
+
+# Serendip data
+SereResultsT1 <- data.frame(PlantHeight=numeric(5),RootLength=numeric(5),RootMass=numeric(5),ShootMass=numeric(5))
+rownames(SereResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
+
+SerePlantHeightLM <- lm(PlantHeight ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
+HPH1 <- anova(SerePlantHeightLM)
+SereResultsT1$PlantHeight <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+linereg <- lm(RootLength ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
+HPH1 <- anova(linereg)
+SereResultsT1$RootLength <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+linereg <- lm(RootMass ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
+HPH1 <- anova(linereg)
+SereResultsT1$RootMass <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+linereg <- lm(ShootMass ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
+HPH1 <- anova(linereg)
+SereResultsT1$ShootMass <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+
+# Now Normalize all the columns
+SereT1 <- SereResultsT1
+
+SereT1[] <- lapply(SereT1[], function(x) x/sum(x))
+
+setDT(SereT1, keep.rownames = TRUE)[]
+
+SereT1_long <- SereT1 %>%
+  gather(SereT1, value,PlantHeight:ShootMass)
+
+SereT1_long$Signif <- c("*", "*", " ", " "," ", "*", "*", " "," ", " ", "*", "*"," ", " ", " ", "*","*", " ", " ", " ")
+
+#################### Poster figure: combine all
+
+# Endophytes included in Name: don't like that but without empty faceting
+SereT1_long["Endophyte"] <- "Serendipita"
+HerbT1_long["Endophyte"] <- "Herbaspirillum"
+burkT1_long["Endophyte"] <- "Burkholderia"
+
+#SereT1_long$SereT1 <- paste("Serendipita", SereT1_long$SereT1, sep="_")
+#HerbT1_long$HerbT1 <- paste("Herbaspirillum", HerbT1_long$HerbT1, sep="_")
+#burkT1_long$burkT1 <- paste("Burkholderia", burkT1_long$burkT1, sep = "_")
+
+names(SereT1_long)[names(SereT1_long) == "SereT1"] <- "Phenotype"
+names(HerbT1_long)[names(HerbT1_long) == "HerbT1"] <- "Phenotype"
+names(burkT1_long)[names(burkT1_long) == "burkT1"] <- "Phenotype"
+
+SandHandB <- rbind(HerbT1_long,burkT1_long,SereT1_long)
+
+cbPalette <- c("#999999", "#F0E442", "tan3", "#56B4E9", "forestgreen", "#0072B2", "#D55E00", "#CC79A7")
+
+ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), label = Signif)) + 
+  geom_col(position=position_stack()) + theme(axis.text.x = element_text( size = 12)) + 
+  theme(axis.text.y = element_text(size = 14)) + 
+  labs(fill = "Variables") + geom_text(aes(label = Signif), size = 5, position = position_stack(vjust = .5))+ 
+  ggtitle("Breakdown of Sum Squares Analysis") + xlab("Measured Phenotypes") + coord_flip() +
+  ylab("Proportion of SS") + scale_fill_manual(values=cbPalette) +
+  theme(panel.background = element_rect(fill = "white",
+                                        colour = "white"), 
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "white"), 
+        panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                        colour = "white")) + 
+  facet_grid(rows = vars(Endophyte), drop = TRUE, space = "free", scales = "free")
+
+
+
+
+# Figure 4 - qPCR - not sure how to add space without faceting and that looks stupid
+foldchange_df$Grow_Number <- gsub('1', 'Grow 1', foldchange_df$Grow_Number)
+foldchange_df$Grow_Number <- gsub('3', 'Grow 3', foldchange_df$Grow_Number)
+
+# Nice Original
+ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fill = Grow_Number, label = Significance)) + 
+  geom_bar(stat = "summary", fun = "mean", position="dodge") + 
+  theme(plot.title = element_text(size=18),axis.text.x = element_text(size=18, angle = 90), axis.text.y = element_text(size=18), axis.title = element_text(size = 18)) + 
+  scale_fill_manual(values = c("dodgerblue", "orange")) + 
+  ggtitle("Differences in Serendipita Abundance by Genotype") + xlab("Genotype") + 
+  ylab("Foldchange Fungal Abundance") + geom_text(aes(label = Significance), size = 5, position = position_stack(vjust = .5)) + 
+  annotate("text", x = 8, y = 3.5, size=5, label = " P-Values for a phenotype less than:\n * = 0.1,    *** = 0.05 ") +
+  theme(panel.background = element_rect(fill = "white",
+                                        colour = "white"), 
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "light grey"), 
+        panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                        colour = "light grey"))
+
+# With Faceting:
+ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fill = Grow_Number, label = Significance)) + 
+  geom_bar(stat = "summary", fun = "mean", position="dodge") + 
+  theme(plot.title = element_text(size=18),axis.text.x = element_text(size=18, angle = 90), axis.text.y = element_text(size=18), axis.title = element_text(size = 18)) + 
+  scale_fill_manual(values = c("dodgerblue", "orange")) + 
+  ggtitle("Differences in Serendipita Abundance by Genotype") + xlab("Genotype") + 
+  ylab("Foldchange Fungal Abundance") + geom_text(aes(label = Significance), size = 5, position = position_stack(vjust = .5)) + 
+  annotate("text", x = 3, y = 5, size=5, label = " P-Values for a phenotype less than:\n * = 0.1,    *** = 0.05 ") +
+  theme(panel.background = element_rect(fill = "white",
+                                        colour = "white"), 
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "light grey"), 
+        panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                        colour = "light grey"))  +
+  facet_grid(cols = vars(Grow_Number), drop = TRUE, space = "free", scales = "free") + ylim(0,6) 
+
+
+# add just an empty column?
+
+g2 <- data.frame(" ", 0, "Grow 3"," ")
+names(g2) <- colnames(foldchange_df)
+
+foldchange_extra <- rbind(foldchange_df, g2)
+
+foldchange_extra$Genotype <- factor(foldchange_extra$Genotype,
+                                    levels = c("TX303","CML52","A635","CML103","B73"," ","KI11","P39","NC350","MS71","CML333"))
+
+ggplot(foldchange_extra, aes(x = Genotype, Double_Delta, fill = Grow_Number, label = Significance)) + 
+  geom_bar(stat = "summary", fun = "mean", position="dodge") + 
+  theme(plot.title = element_text(size=18),axis.text.x = element_text(size=18, angle = 90), axis.text.y = element_text(size=18), axis.title = element_text(size = 18)) + 
+  scale_fill_manual(values = c("dodgerblue", "orange")) + 
+  ggtitle("Differences in Serendipita Abundance by Genotype") + xlab("Genotype") + 
+  ylab("Foldchange Fungal Abundance") + geom_text(aes(label = Significance), size = 5, position = position_stack(vjust = .5)) + 
+  annotate("text", x = 8, y = 3.5, size=5, label = " P-Values for a phenotype less than:\n * = 0.1,    *** = 0.05 ") +
+  theme(panel.background = element_rect(fill = "white",
+                                        colour = "white"), 
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "light grey"), 
+        panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                        colour = "light grey"))
+
