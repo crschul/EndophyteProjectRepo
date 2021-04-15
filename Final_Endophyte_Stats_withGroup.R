@@ -126,12 +126,39 @@ names(final.table) <- c("Trait", "Heritability")
 
 print(final.table)
 
+# linear regression but drop rep as a variable - doesnt really change anything
+linreg <- lapply(myvars, function(x)lm(eval(paste0(x, '~ Group_or_Date + Genotype + Condition + Genotype:Condition')), data = Herb_data) 
+                 %>% anova()) 
+
+calcs <- lapply(linreg, function(j)(j[4,2]/(j[4,2] + j[5,2])))#extract and calculate the actual heritability for each table
+
+#make a final table with the traits and calculated heritability
+final.table <- cbind(((colnames(Herb_data[5:11]))),as.data.frame(do.call(rbind, calcs)))
+names(final.table) <- c("Trait", "Heritability")
+
+print(final.table)
+
 # non loop as an example:
 #Height
 height3model <- lm(Herb_data$PlantHeight ~ Herb_data$Genotype*Herb_data$Condition, data=Herb_data)
 height3tab <- anova(height3model)
 height3.het <- height3tab[3,2]/(height3tab[3,2] + height3tab[4,2])  #Heritability Calculation
 height3.het
+
+# Include random effects with genotype nested into group and vice versa
+library(lme4)
+library(lmerTest)
+library(tidyverse)
+
+# Condition + Genotype:Condition
+
+ranef <- lapply(myvars, function(x)lmer(eval(paste0(x, '~ Group_or_Date + Genotype + Condition + Genotype:Condition + (1 | Group_or_Date/Genotype) ')), data = Herb_data) 
+                          %>% anova()) 
+
+testmm <- lmer(PlantHeight ~ Group_or_Date + Genotype + Condition + Genotype:Condition + (1 | Group_or_Date/Genotype), data = Herb_data, REML = FALSE)
+anova(testmm)
+
+
 ##### Variance Decomposition Analysis - using type 1 ANOVA - loop below to handle signifigance values. 
 
 HerbResultsT1 <- data.frame(Chlorophyll1=numeric(6),Chlorophyll2=numeric(6),Chlorophyll3=numeric(6),PlantHeight=numeric(6),LeafArea=numeric(6),RootLength=numeric(6),RootVolume=numeric(6))
@@ -166,6 +193,9 @@ HPH1 <- anova(linereg)
 HerbResultsT1$RootVolume <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2],HPH1[6,2])
 
 # Sum of Squares analysis loop
+HerbResultsT1 <- data.frame(Chlorophyll1=numeric(6),Chlorophyll2=numeric(6),Chlorophyll3=numeric(6),PlantHeight=numeric(6),LeafArea=numeric(6),RootLength=numeric(6),RootVolume=numeric(6))
+rownames(HerbResultsT1) <- c("Rep","Group","Genotype","Inoculation","Genotype:Inoculation","Residuals")
+
 myvars <- names(Herb_data[5:11]) # create a list of traits
 Signif_list <- list()
 
@@ -214,6 +244,69 @@ HerbT1_long$Signif <- Signif_list
 F1 <- ggplot(HerbT1_long, aes(x = HerbT1, y = value, fill = forcats::fct_rev(rn), label = Signif)) + geom_col(position=position_stack()) + theme(axis.text.x = element_text(angle = 90)) + labs(fill = "Variables") + geom_text(aes(label = Signif), size = 5, position = position_stack(vjust = .5)) + ggtitle("Variance Decomposition Analysis: Herbaspirillum") + xlab("Growth Promoted Phenotypes")
 
 F1
+
+
+############## Do a variance decomposition loop with the mixed modeol no rep or residuals
+HerbResultsT1 <- data.frame(Chlorophyll1=numeric(4),Chlorophyll2=numeric(4),Chlorophyll3=numeric(4),PlantHeight=numeric(4),LeafArea=numeric(4),RootLength=numeric(4),RootVolume=numeric(4))
+rownames(HerbResultsT1) <- c("Group","Genotype","Inoculation","Genotype:Inoculation")
+
+# Sum of Squares analysis loop
+
+myvars <- names(Herb_data[5:11]) # create a list of traits
+Signif_list <- list()
+
+for( m in myvars){
+  print(m)
+  print(as.name(m))
+  linmod <- lmer(Herb_data[[m]] ~ Group_or_Date + Genotype + Condition + Genotype:Condition + (1 | Group_or_Date/Genotype), data = Herb_data, REML = FALSE)
+  #print(summary(linmod))
+  HPH1 <- anova(linmod)
+  #print(HPH1)
+  HerbResultsT1[[m]] <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2])
+  itlist = HPH1[,6]
+  Signif_list <- append(Signif_list, itlist)
+}
+
+#Get rid of the NAs from residuals
+Signif_list[is.na(Signif_list)] = 1
+Signif_list
+
+# Convert these p values to *
+for( s in 1:length(Signif_list)){
+  #print(s)
+  if (Signif_list[s] < .05){
+    Signif_list[s] <- '*'
+    #print("True")
+  } else {
+    Signif_list[s] <- " "
+    #print("False")
+  }
+}
+Signif_list
+
+# Now Normalize all the columns
+HerbT1 <- HerbResultsT1
+
+HerbT1[] <- lapply(HerbT1[], function(x) x/sum(x))
+setDT(HerbT1, keep.rownames = TRUE)[]
+
+HerbT1_long <- HerbT1 %>%
+  gather(HerbT1, value,Chlorophyll1:RootVolume)
+
+HerbT1_long$Signif <- Signif_list
+
+#HerbT1_long$Signif <- c("*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", "*", " ", " ", " ","*", " ", "*", " ", " ","*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", " ", " ", "*", " ")
+
+
+#F1 <- ggplot(HerbT1_long, aes(x = HerbT1, y = value, fill = forcats::fct_rev(rn))) + geom_col(position=position_stack()) + theme(axis.text.x = element_text(angle = 90)) + labs(fill = "Variables") + ggtitle("Variance Decomposition Analysis: Herbaspirillum") + xlab("Growth Promoted Phenotypes")
+F1 <- ggplot(HerbT1_long, aes(x = HerbT1, y = value, fill = forcats::fct_rev(rn), label = Signif)) + geom_col(position=position_stack()) + theme(axis.text.x = element_text(angle = 90)) + labs(fill = "Variables") + geom_text(aes(label = Signif), size = 5, position = position_stack(vjust = .5)) + ggtitle("Variance Decomposition Analysis: Herbaspirillum") + xlab("Growth Promoted Phenotypes")
+
+F1
+
+
+
+
+
 
 ##### Variance Decomposition Analysis - using type 2 ANOVA
 # signifigance is just the left column of the ANOVA duh you big dummy. 
@@ -354,7 +447,7 @@ height3.het
 ##########################################################################################
 
 names(Serendip_data) <- c("Genotype", "Condition", "Rep", "Endophyte",
-                          "PlantHeight","RootLength","RootMass","ShootMass")
+                          "PlantHeight","RootLength","RootMass","ShootMass","Group_or_Date")
 
 
 ##### Visualize Phenotypes - use these two lines to make any histograms
@@ -489,7 +582,7 @@ print(final.table3)
 ##### Variance decomposition analysis - ANOVA type I
 # Sum of Squares analysis loop
 SereResultsT1 <- data.frame(PlantHeight=numeric(6),RootLength=numeric(6),RootMass=numeric(6),ShootMass=numeric(6))
-rownames(SereResultsT1) <- c("Rep","Group","Genotype","Inoculation","Genotype:Inoculation","Residuals")
+rownames(SereResultsT1) <- c("Rep", "Group","Genotype","Inoculation","Genotype:Inoculation", "Residuals")
 
 myvars <- names(Serendip_data[5:8]) # create a list of traits
 Signif_list <- list()
@@ -539,6 +632,67 @@ HerbT1_long$Signif <- Signif_list
 F1 <- ggplot(HerbT1_long, aes(x = HerbT1, y = value, fill = forcats::fct_rev(rn), label = Signif)) + geom_col(position=position_stack()) + theme(axis.text.x = element_text(angle = 90)) + labs(fill = "Variables") + geom_text(aes(label = Signif), size = 5, position = position_stack(vjust = .5)) + ggtitle("Variance Decomposition Analysis: Serendipita") + xlab("Growth Promoted Phenotypes")
 
 F1
+
+
+
+
+
+# Sum of Squares analysis loop - mixed models with no rep and no residuals include date
+SereResultsT1 <- data.frame(PlantHeight=numeric(4),RootLength=numeric(4),RootMass=numeric(4),ShootMass=numeric(4))
+rownames(SereResultsT1) <- c("Group","Genotype","Inoculation","Genotype:Inoculation")
+
+myvars <- names(Serendip_data[5:8]) # create a list of traits
+Signif_list <- list()
+
+for( m in myvars){
+  print(m)
+  print(as.name(m))
+  linmod <- lmer(Serendip_data[[m]] ~ Group_or_Date + Genotype + Condition + Genotype:Condition + (1 | Group_or_Date/Genotype), data = Serendip_data, REML = FALSE)
+  HPH1 <- anova(linmod)
+  print(HPH1)
+  SereResultsT1[[m]] <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2])
+  itlist = HPH1[,6]
+  Signif_list <- append(Signif_list, itlist)
+}
+
+#Get rid of the NAs from residuals
+Signif_list[is.na(Signif_list)] = 1
+Signif_list
+
+# Convert these p values to *
+for( s in 1:length(Signif_list)){
+  #print(s)
+  if (Signif_list[s] < .05){
+    Signif_list[s] <- '*'
+    #print("True")
+  } else {
+    Signif_list[s] <- " "
+    #print("False")
+  }
+}
+Signif_list
+
+# Now Normalize all the columns
+HerbT1 <- SereResultsT1
+
+HerbT1[] <- lapply(HerbT1[], function(x) x/sum(x))
+setDT(HerbT1, keep.rownames = TRUE)[]
+
+HerbT1_long <- HerbT1 %>%
+  gather(HerbT1, value,PlantHeight:ShootMass)
+
+HerbT1_long$Signif <- Signif_list
+
+#HerbT1_long$Signif <- c("*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", "*", " ", " ", " ","*", " ", "*", " ", " ","*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", " ", " ", "*", " ")
+
+
+#F1 <- ggplot(HerbT1_long, aes(x = HerbT1, y = value, fill = forcats::fct_rev(rn))) + geom_col(position=position_stack()) + theme(axis.text.x = element_text(angle = 90)) + labs(fill = "Variables") + ggtitle("Variance Decomposition Analysis: Herbaspirillum") + xlab("Growth Promoted Phenotypes")
+F1 <- ggplot(HerbT1_long, aes(x = HerbT1, y = value, fill = forcats::fct_rev(rn), label = Signif)) + geom_col(position=position_stack()) + theme(axis.text.x = element_text(angle = 90)) + labs(fill = "Variables") + geom_text(aes(label = Signif), size = 5, position = position_stack(vjust = .5)) + ggtitle("Variance Decomposition Analysis: Serendipita") + xlab("Growth Promoted Phenotypes")
+
+F1
+
+
+
 ############ Non looped way without date
 SereResultsT1 <- data.frame(PlantHeight=numeric(5),RootLength=numeric(5),RootMass=numeric(5),ShootMass=numeric(5))
 rownames(SereResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
