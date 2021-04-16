@@ -259,9 +259,10 @@ for( m in myvars){
   print(m)
   print(as.name(m))
   linmod <- lmer(Herb_data[[m]] ~ Group_or_Date + Genotype + Condition + Genotype:Condition + (1 | Group_or_Date/Genotype), data = Herb_data, REML = FALSE)
-  #print(summary(linmod))
+  
   HPH1 <- anova(linmod)
-  #print(HPH1)
+  print(HPH1)
+  print(summary(linmod))
   HerbResultsT1[[m]] <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2])
   itlist = HPH1[,6]
   Signif_list <- append(Signif_list, itlist)
@@ -647,13 +648,17 @@ Signif_list <- list()
 for( m in myvars){
   print(m)
   print(as.name(m))
-  linmod <- lmer(Serendip_data[[m]] ~ Group_or_Date + Genotype + Condition + Genotype:Condition + (1 | Group_or_Date/Genotype), data = Serendip_data, REML = FALSE)
+  #linmod <- lmer(Serendip_data[[m]] ~ Group_or_Date + Genotype + Condition + Genotype:Condition + (1 | Group_or_Date/Genotype), data = Serendip_data, REML = FALSE)
+  linmod <- lmer(Serendip_data[[m]] ~ Group_or_Date + Genotype + Condition + Genotype:Condition + (1 | Group_or_Date), data = Serendip_data, REML = FALSE)
   HPH1 <- anova(linmod)
   print(HPH1)
+  print(summary(linmod))
   SereResultsT1[[m]] <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2])
   itlist = HPH1[,6]
   Signif_list <- append(Signif_list, itlist)
 }
+
+# For monday 4/19/21 Manually enter the residuals from this loop into SereResultsT1 to add them to var decomp
 
 #Get rid of the NAs from residuals
 Signif_list[is.na(Signif_list)] = 1
