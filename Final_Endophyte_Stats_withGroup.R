@@ -593,6 +593,7 @@ for( m in myvars){
   print(as.name(m))
   linmod <- lm(Serendip_data[[m]] ~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition, data = Serendip_data)
   HPH1 <- anova(linmod)
+  print(HPH1)
   SereResultsT1[[m]] <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2],HPH1[6,2])
   itlist = HPH1[,5]
   Signif_list <- append(Signif_list, itlist)
@@ -634,9 +635,35 @@ F1 <- ggplot(HerbT1_long, aes(x = HerbT1, y = value, fill = forcats::fct_rev(rn)
 
 F1
 
+# testing stuff - aov(lm) and aov(formula)  are different
+for( m in myvars){
+  print(m)
+  print(as.name(m))
+  linmod <- lm(Serendip_data[[m]] ~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition, data = Serendip_data)
+  HPH1 <- anova(linmod)
+  print(HPH1)
+  summary(aov(Serendip_data[[m]] ~ Rep + Group_or_Date + Genotype + Condition + Genotype:Condition, data = Serendip_data))
+}
 
+HerbResultsT1 <- data.frame(Chlorophyll1=numeric(4),Chlorophyll2=numeric(4),Chlorophyll3=numeric(4),PlantHeight=numeric(4),LeafArea=numeric(4),RootLength=numeric(4),RootVolume=numeric(4))
+rownames(HerbResultsT1) <- c("Group","Genotype","Inoculation","Genotype:Inoculation")
 
+# Sum of Squares analysis loop
 
+myvars <- names(Herb_data[5:11]) # create a list of traits
+Signif_list <- list()
+
+for( m in myvars){
+  print(m)
+  print(as.name(m))
+  linmod <- lmer(Herb_data[[m]] ~ G~  (1 | Genotype) + (1 | Condition) + (1 | Genotype:Condition) + (1 | Group_or_Date), data = Herb_data, REML = FALSE)
+  HPH1 <- anova(linmod)
+  print(HPH1)
+  print(summary(linmod))
+  HerbResultsT1[[m]] <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2])
+  itlist = HPH1[,6]
+  Signif_list <- append(Signif_list, itlist)
+}
 
 # Sum of Squares analysis loop - mixed models with no rep and no residuals include date
 SereResultsT1 <- data.frame(PlantHeight=numeric(4),RootLength=numeric(4),RootMass=numeric(4),ShootMass=numeric(4))
@@ -649,15 +676,26 @@ for( m in myvars){
   print(m)
   print(as.name(m))
   #linmod <- lmer(Serendip_data[[m]] ~ Group_or_Date + Genotype + Condition + Genotype:Condition + (1 | Group_or_Date/Genotype), data = Serendip_data, REML = FALSE)
-  linmod <- lmer(Serendip_data[[m]] ~ Group_or_Date + Genotype + Condition + Genotype:Condition + (1 | Group_or_Date), data = Serendip_data, REML = FALSE)
-  HPH1 <- anova(linmod)
-  print(HPH1)
-  print(summary(linmod))
+  #linmod <- lmer(Serendip_data[[m]] ~ Genotype + Condition + Genotype:Condition + (1 | Group_or_Date), data = Serendip_data, REML = TRUE)
+  linmod <- lmer(Serendip_data[[m]] ~  (1 | Genotype) + (1 | Condition) + (1 | Genotype:Condition) + (1 | Group_or_Date), data = Serendip_data, REML = FALSE)
+  HPH1 <- anova(linmod, type = c("I"))
+  print(HPH1) #anova
+  varcomp <- VarCorr(linmod)
+  print(varcomp, comp = "Variance")
+  #print(summary(linmod)) # then print mm summary for residuals
   SereResultsT1[[m]] <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2])
   itlist = HPH1[,6]
   Signif_list <- append(Signif_list, itlist)
 }
 
+
+linmod <- lmer(PlantHeight ~ Genotype + Condition + Genotype:Condition + (1 | Group_or_Date), data = Serendip_data, REML = TRUE)
+HPH1 <- anova(linmod, type = c("I"))
+varcomp <- VarCorr(linmod)
+print(varcomp, comp = "Variance")
+get_variance(linmod)
+
+print(aov(PlantHeight ~ Genotype + Condition + Genotype:Condition + Error(Group_or_Date), data = Serendip_data))
 # For monday 4/19/21 Manually enter the residuals from this loop into SereResultsT1 to add them to var decomp
 
 #Get rid of the NAs from residuals
