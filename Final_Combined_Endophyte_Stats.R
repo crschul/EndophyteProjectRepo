@@ -533,7 +533,8 @@ doubledelta_df <- doubledelta_df[!(doubledelta_df$Genotype=="MO18W"),]
 ggplot(doubledelta_df, aes(Genotype, Double_Delta, fill = Experiment_Number)) + geom_bar(stat = "summary", fun = "mean", position="dodge") + theme(axis.text.x = element_text(size=12)) + scale_fill_manual(values = c("slateblue4", "slategrey", "indianred3")) + ggtitle("Average Double Delta Value of Serendipita Inoculation by Genotype")
 
 # Transform to fold change
-foldchange_df = transform(doubledelta_df, Double_Delta = log2(-Double_Delta))
+foldchange_df = transform(doubledelta_df, Double_Delta = log(2^-Double_Delta))
+foldchange_df = transform(doubledelta_df, Double_Delta = log2(-Double_Delta)) # same pattern slightly smaller?
 
 # Add phenotype significance from t - tests .1 - .05
 foldchange_df['Significance'] <- c('~',' ',' ',' ','*','~',' ','*','*','*')
@@ -541,7 +542,7 @@ foldchange_df['Significance'] <- c('~',' ',' ',' ','*','~',' ','*','*','*')
 #Graph fold change
 #ggplot(foldchange_df, aes(Genotype, Double_Delta, fill = Experiment_Number)) + geom_bar(stat = "summary", fun = "mean", position="dodge") + theme(axis.text.x = element_text(size=12)) + scale_fill_manual(values = c("slateblue4", "slategrey", "indianred3")) + ggtitle("Expression Change of Serendipita Inoculation by Genotype")
 
-ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fill = Grow_Number, label = Significance)) + geom_bar(stat = "summary", fun = "mean", position="dodge") + theme(plot.title = element_text(size=18),axis.text.x = element_text(size=18), axis.text.y = element_text(size=18), axis.title = element_text(size = 18)) + scale_fill_manual(values = c("dodgerblue", "orange")) + ggtitle("Expression Change of Serendipita Inoculation by Genotype") + xlab("Genotype") + ylab("2^Double_Delta") + geom_text(aes(label = Significance), size = 5, position = position_stack(vjust = .5)) + annotate("text", x = 8, y = 3.5, size=5, label = " P-Values for a phenotype less than:\n * = 0.1,    *** = 0.05 ") 
+ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fill = Grow_Number, label = Significance)) + geom_bar(stat = "summary", fun = "mean", position="dodge") + theme(plot.title = element_text(size=18),axis.text.x = element_text(size=18), axis.text.y = element_text(size=18), axis.title = element_text(size = 18)) + scale_fill_manual(values = c("dodgerblue", "orange")) + ggtitle("Expression Change of Serendipita Inoculation by Genotype") + xlab("Genotype") + ylab("2^Double_Delta") + geom_text(aes(label = Significance), size = 5, position = position_stack(vjust = .5)) + annotate("text", x = 8, y = 3.5, size=5, label = " P-Values for a phenotype less than:\n ~ = 0.1,    *** = 0.05 ") 
 
 # T Test comparing inoculated and control single delta values. 
 genotypes <- unique(qpcr_delta1$Genotype)

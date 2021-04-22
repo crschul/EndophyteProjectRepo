@@ -27,13 +27,30 @@ Signif_list <- list()
 for( m in myvars){
   print(m)
   print(as.name(m))
-  linmod <- lmer(Herb_data[[m]] ~ (1 | Genotype) + (1 | Condition) + (1 | Genotype:Condition) + (1 | Group_or_Date), data = Herb_data, REML = FALSE)
+  linmod <- lmer(Herb_data[[m]] ~ (1 | Genotype) + (1 | Condition) + (1 | Genotype:Condition) + (1 | Group_or_Date), data = Herb_data, REML = TRUE,
+                 control = lmerControl(optimizer = "bobyqa", optCtrl=list(maxfun=200000) ))
   varcomp <- VarCorr(linmod)
   print(varcomp, comp = "Variance")
+  #rtab <- ranova(linmod)
+  #print(rtab)
+  relgrad <- with(linmod@optinfo$derivs,solve(Hessian,gradient))
+  #print(max(abs(relgrad)))
+  #print(summary(linmod))
+  print("####################################################")
 }
 
+for( m in myvars){
+  print(m)
+  print(as.name(m))
+  linmod <- lmer(Herb_data[[m]] ~  Genotype + Condition + (1 | Genotype:Condition) + (1 | Group_or_Date), data = Herb_data, REML = FALSE)
+  HPH1 <- anova(linmod, type = c("I"))
+  #print(HPH1) #anova
+  varcomp <- VarCorr(linmod)
+  print(varcomp, comp = "Variance")
+  #print(summary(linmod)) # then print mm summary for residuals
+}
 
-
+# convergence test: https://github.com/lme4/lme4/issues/120
 
 SereResultsT1 <- data.frame(PlantHeight=numeric(4),RootLength=numeric(4),RootMass=numeric(4),ShootMass=numeric(4))
 rownames(SereResultsT1) <- c("Group","Genotype","Inoculation","Genotype:Inoculation")
@@ -61,14 +78,29 @@ for( m in myvars){
 for( m in myvars){
   print(m)
   print(as.name(m))
-  linmod <- lmer(Serendip_data[[m]] ~  (1 | Genotype) + (1 | Condition) + (1 | Genotype:Condition) + (1 | Group_or_Date), data = Serendip_data, REML = FALSE)
+  linmod <- lmer(Serendip_data[[m]] ~  (1 | Genotype) + (1 | Condition) + (1 | Genotype:Condition) + (1 | Group_or_Date), data = Serendip_data, REML = TRUE, control = lmerControl(optimizer = "bobyqa", optCtrl=list(maxfun=200000) ))
   varcomp <- VarCorr(linmod)
   print(varcomp, comp = "Variance")
-  print("/n")
-  print(summary(linmod))
-  print(deviance(linmod))
+  rtab <- ranova(linmod)
+  print(rtab)
+  #print(summary(rtab))
+  #print("/n")
+  #print(summary(linmod))
+  #print(deviance(linmod))
   print("################################################################")
 }
+
+# All random - try bayesian ANOVA
+library(BayesFactor)
+
+Serendip_data$Group_or_Date <- as.factor(Serendip_data$Group_or_Date)
+banov <- anovaBF(PlantHeight ~ Genotype + Condition + Group_or_Date + Genotype:Condition, 
+                 data = Serendip_data, whichRandom = "Group_or_Date", progress = FALSE, iterations = 20000)
+print(banov)
+
+# Anova summary no model just to see
+summary(anova(PlantHeight ~ Genotype + Condition + Genotype:Condition + Error(Group_or_Date), 
+            data = Serendip_data, type=("I")))
 
 # Only group random
 for( m in myvars){
@@ -156,4 +188,3 @@ anova(m1)
 summary(m1)
 
 
-# tommorow: show which models do or dont converge. Which residuals and variance you can get, and what you seem to not understande. Jason will help. 
