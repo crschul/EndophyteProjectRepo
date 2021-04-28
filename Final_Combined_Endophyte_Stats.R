@@ -504,7 +504,7 @@ qpcr_data = qpcr_data[complete.cases(qpcr_data),]
 qpcr_data['calcs'] <- NA
 
 # delta ct: experimental gene - housekeeping gene - this is for a single sample
-qpcr_delta1 <- transform(qpcr_data, calcs = Cp_ITS - Cp_CDK)
+qpcr_delta1 <- transform.data.frame(qpcr_data, calcs = Cp_ITS - Cp_CDK)
 
 # average all the delta ct values by genotype and condition so you can do the second delta from the combined samples
 qpcr_sum <- summarySE(data = qpcr_delta1, measurevar = "calcs", groupvars = c("Genotype","Condition"), na.rm = TRUE)
@@ -533,8 +533,8 @@ doubledelta_df <- doubledelta_df[!(doubledelta_df$Genotype=="MO18W"),]
 ggplot(doubledelta_df, aes(Genotype, Double_Delta, fill = Experiment_Number)) + geom_bar(stat = "summary", fun = "mean", position="dodge") + theme(axis.text.x = element_text(size=12)) + scale_fill_manual(values = c("slateblue4", "slategrey", "indianred3")) + ggtitle("Average Double Delta Value of Serendipita Inoculation by Genotype")
 
 # Transform to fold change
-foldchange_df = transform(doubledelta_df, Double_Delta = log(2^-Double_Delta))
-foldchange_df = transform(doubledelta_df, Double_Delta = log2(-Double_Delta)) # same pattern slightly smaller?
+foldchange_df = transform.data.frame(doubledelta_df, Double_Delta = log(2^-Double_Delta))
+foldchange_df = transform.data.frame(doubledelta_df, Double_Delta = log2(-Double_Delta)) # same pattern slightly smaller?
 
 # Add phenotype significance from t - tests .1 - .05
 foldchange_df['Significance'] <- c('~',' ',' ',' ','*','~',' ','*','*','*')
@@ -775,8 +775,8 @@ Fig_HRV <- ggplot(Herb_data, aes(x =Genotype, y=RootVolume, group = Condition, f
                                            panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
                                                                            colour = "light grey")) +
   annotate("text", x = 9, y = 9, label = " * represent t-test pvalue < .05", size = 6) +
-  annotate("text", x = 5, y = 9, label = " * ", size = 10) + 
-  annotate("text", x = 12, y = 7, label = " * ", size = 10) + 
+  annotate("text", x = 5, y = 8, label = " * ", size = 14) + 
+  annotate("text", x = 12, y = 7, label = " * ", size = 14) + 
   labs(caption=str_wrap(figHRV_cap, 80)) + 
   theme(plot.caption = element_text(hjust = 0.5,size = 16)) + theme(legend.position = "right")
 
@@ -787,7 +787,7 @@ Fig_HRV
 Burk_data$Condition <- gsub('C', 'Control', Burk_data$Condition)
 Burk_data$Condition <- gsub('I', 'Inoculated', Burk_data$Condition)
 
-figBPH_cap = "Figure 1: Plant Height (cm) across genotypes. Soil was inoculated with Burkholderia in nutrient broth (green) or sterile nutrient broth (brown).  "
+figBPH_cap = "Figure 2: Plant Height (cm) across genotypes. Soil was inoculated with Burkholderia in nutrient broth (green) or sterile nutrient broth (brown).  "
 
 
 Fig_BPH <- ggplot(Burk_data, aes(x =Genotype, y=PlantHeight, group = Condition, fill = Condition)) + 
@@ -824,8 +824,8 @@ Fig2A_above <- ggplot(Serendip_data, aes(x =Genotype, y=ShootMass, group = Condi
   geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
   scale_color_manual(values = c( "tan3", "forestgreen")) + ylab(" Shoot Mass (mg)") + 
   theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
+  theme(axis.text.y = element_text(size = 24), axis.title.y = element_text(size = 24), plot.title = element_text(size=26)) + 
+  theme(legend.title = element_text(size=20), legend.text = element_text(size=24)) + 
   ggtitle("Serendipita Shoot Mass") + theme(panel.background = element_rect(fill = "white",
                                                                             colour = "white"), 
                                             panel.grid.major = element_line(size = 0.5, linetype = 'solid',
@@ -833,30 +833,29 @@ Fig2A_above <- ggplot(Serendip_data, aes(x =Genotype, y=ShootMass, group = Condi
                                             panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
                                                                             colour = "light grey")) +
   annotate("text", x = 10, y = 1100, label = " * represent t-test pvalue < .05", size = 8) +
-  annotate("text", x = 10, y = 400, label = " * ", size = 10) + 
-  annotate("text", x = 11, y = 400, label = " * ", size = 10) +
-  annotate("text", x = 12, y = 750, label = " * ", size = 10)  + theme(legend.position = "right")
+  annotate("text", x = 10, y = 400, label = " * ", size = 18) + 
+  annotate("text", x = 11, y = 400, label = " * ", size = 18) +
+  annotate("text", x = 12, y = 750, label = " * ", size = 18) + theme(legend.position = "right")
 Fig2A_above
 
-fig2_cap = "Figure 2: Dried shoot and root mass (grams) across genotypes. Plants were inoculated with Serendipita on clay particles (green) or sterile clay particles (brown). Maize genotype P39 is the only line that shows growth promotion both above and below ground, showcasing differential growth promotion. "
-
+fig2_cap = "Figure 3: Dried shoot and root mass (grams) across genotypes. Plants were inoculated with Serendipita on clay particles (green) or sterile clay particles (brown). Maize genotype P39 is the only line that shows growth promotion both above and below ground, showcasing differential growth promotion. "
 
 
 Fig2B_above <- ggplot(Serendip_data, aes(x =Genotype, y=RootMass, group = Condition, fill = Condition)) + 
   geom_point(aes(colour = Condition),size=3, position = position_jitterdodge(jitter.width = .01)) + 
   scale_color_manual(values = c( "tan3", "forestgreen")) + ylab(" Root Mass (mg)") + 
   theme(axis.text.x = element_text(angle = 90, size = 24), axis.title.x = element_text(size = 24)) + 
-  theme(axis.text.y = element_text(size = 18), axis.title.y = element_text(size = 16), plot.title = element_text(size=18)) + 
-  theme(legend.title = element_text(size=20), legend.text = element_text(size=18)) + 
+  theme(axis.text.y = element_text(size = 24), axis.title.y = element_text(size = 24), plot.title = element_text(size=26)) + 
+  theme(legend.title = element_text(size=24), legend.text = element_text(size=24)) + 
   ggtitle("Serendipita Root Mass") + theme(panel.background = element_rect(fill = "white",
                                                                             colour = "white"), 
                                             panel.grid.major = element_line(size = 0.5, linetype = 'solid',
                                                                             colour = "light grey"), 
                                             panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
                                                                             colour = "light grey")) +
-  annotate("text", x = 10, y = 525, label = " * represent t-test pvalue < .05", size = 8) +
-  annotate("text", x = 6, y = 500, label = " * ", size = 10) + 
-  annotate("text", x = 11, y = 250, label = " * ", size = 10) + 
+  annotate("text", x = 10, y = 425, label = " * represent t-test pvalue < .05", size = 8) +
+  annotate("text", x = 6, y = 400, label = " * ", size = 18) + 
+  annotate("text", x = 11, y = 250, label = " * ", size = 18) + 
   labs(caption=str_wrap(fig2_cap, 100)) + 
   theme(plot.caption = element_text(hjust = 0.5,size = 22)) + theme(legend.position = "right")
 
@@ -867,38 +866,93 @@ Fig2B_above
 Figure2 <- ggarrange(Fig2A_above, Fig2B_above, ncol =1, nrow = 2, labels = c("A", "B"))
 Figure2
 
-# Fig 3 - Sum Square analysis
-# Herb data
-HerbResultsT1 <- data.frame(Chlorophyll1=numeric(5),Chlorophyll2=numeric(5),Chlorophyll3=numeric(5),PlantHeight=numeric(5),LeafArea=numeric(5),RootLength=numeric(5),RootVolume=numeric(5))
-rownames(HerbResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
+# Fig 4 - Sum Square analysis
+# With loops comment out below
 
-HerbPlantHeightLM <- lm(PlantHeight ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
-HPH1 <- anova(HerbPlantHeightLM)
-HerbResultsT1$PlantHeight <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# number of variables in our model + residuals
+n = 4
 
-HerbChl1LM <- lm(Chlorophyll1 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
-HPH1 <- anova(HerbChl1LM)
-HerbResultsT1$Chlorophyll1 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# Serendipita
+SereResultsT1 <- data.frame(PlantHeight=numeric(n),RootLength=numeric(n),RootMass=numeric(n),ShootMass=numeric(n))
+rownames(SereResultsT1) <- c("Genotype","Inoculation","Genotype:Inoculation", "Residuals")
 
-linereg <- lm(Chlorophyll2 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
-HPH1 <- anova(linereg)
-HerbResultsT1$Chlorophyll2 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+myvars <- names(Serendip_data[5:8]) # create a list of traits
+Signif_list <- list()
 
-linereg <- lm(Chlorophyll3 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
-HPH1 <- anova(linereg)
-HerbResultsT1$Chlorophyll3 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+for( m in myvars){
+  print(m)
+  print(as.name(m))
+  linmod <- lm(Serendip_data[[m]] ~ Genotype + Condition + Genotype:Condition, data = Serendip_data)
+  HPH1 <- anova(linmod)
+  print(HPH1)
+  SereResultsT1[[m]] <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2])
+  itlist = HPH1[,5]
+  Signif_list <- append(Signif_list, itlist)
+}
 
-linereg <- lm(LeafArea ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
-HPH1 <- anova(linereg)
-HerbResultsT1$LeafArea <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+#Get rid of the NAs from residuals
+Signif_list[is.na(Signif_list)] = 1
+Signif_list
 
-linereg <- lm(RootLength ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
-HPH1 <- anova(linereg)
-HerbResultsT1$RootLength <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# Convert these p values to *
+for( s in 1:length(Signif_list)){
+  #print(s)
+  if (Signif_list[s] < .05){
+    Signif_list[s] <- '*'
+    #print("True")
+  } else {
+    Signif_list[s] <- " "
+    #print("False")
+  }
+}
+Signif_list
 
-linereg <- lm(RootVolume ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
-HPH1 <- anova(linereg)
-HerbResultsT1$RootVolume <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# Now Normalize all the columns
+ST1 <- SereResultsT1
+
+ST1[] <- lapply(ST1[], function(x) x/sum(x))
+setDT(ST1, keep.rownames = TRUE)[]
+
+SereT1_long <- ST1 %>%
+  gather(ST1, value,PlantHeight:ShootMass)
+
+SereT1_long$Signif <- Signif_list
+
+
+# Herbaspirillum
+HerbResultsT1 <- data.frame(Chlorophyll1=numeric(n),Chlorophyll2=numeric(n),Chlorophyll3=numeric(n),PlantHeight=numeric(n),LeafArea=numeric(n),RootLength=numeric(n),RootVolume=numeric(n))
+rownames(HerbResultsT1) <- c("Genotype","Inoculation","Genotype:Inoculation", "Residuals")
+
+myvars <- names(Herb_data[5:11]) # create a list of traits
+Signif_list <- list()
+
+for( m in myvars){
+  print(m)
+  print(as.name(m))
+  linmod <- lm(Herb_data[[m]] ~ Genotype + Condition + Genotype:Condition, data = Herb_data)
+  HPH1 <- anova(linmod)
+  print(HPH1)
+  HerbResultsT1[[m]] <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2])
+  itlist = HPH1[,5]
+  Signif_list <- append(Signif_list, itlist)
+}
+
+#Get rid of the NAs from residuals
+Signif_list[is.na(Signif_list)] = 1
+Signif_list
+
+# Convert these p values to *
+for( s in 1:length(Signif_list)){
+  #print(s)
+  if (Signif_list[s] < .05){
+    Signif_list[s] <- '*'
+    #print("True")
+  } else {
+    Signif_list[s] <- " "
+    #print("False")
+  }
+}
+Signif_list
 
 # Now Normalize all the columns
 HerbT1 <- HerbResultsT1
@@ -909,101 +963,79 @@ setDT(HerbT1, keep.rownames = TRUE)[]
 HerbT1_long <- HerbT1 %>%
   gather(HerbT1, value,Chlorophyll1:RootVolume)
 
-
-HerbT1_long$Signif <- c("*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", "*", " ", " ", " ","*", " ", "*", " ", " ","*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", " ", " ", "*", " ")
-
-HerbT1_long
-
-# burk data
-burkResultsT1 <- data.frame(PlantHeight=numeric(5),LeafArea=numeric(5),RootLength=numeric(5),RootVolume=numeric(5))
-rownames(burkResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
-
-SerePlantHeightLM <- lm(PlantHeight ~ Genotype +Condition + Rep + Genotype*Condition, data=Burk_data)
-HPH1 <- anova(SerePlantHeightLM)
-burkResultsT1$PlantHeight <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
-
-linereg <- lm(LeafArea ~ Genotype +Condition + Rep + Genotype*Condition, data=Burk_data)
-HPH1 <- anova(linereg)
-burkResultsT1$LeafArea <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+HerbT1_long$Signif <- Signif_list
 
 
-linereg <- lm(as.numeric(RootLength) ~ Genotype +Condition + Rep + Genotype*Condition, data=Burk_data)
-HPH1 <- anova(linereg)
-burkResultsT1$RootLength <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# Burkholderia
+Burk_data$RootLength <- as.numeric(Burk_data$RootLength)
+Burk_data$RootVolume <- as.numeric(Burk_data$RootVolume)
 
-linereg <- lm(as.numeric(RootVolume) ~ Genotype +Condition + Rep + Genotype*Condition, data=Burk_data)
-HPH1 <- anova(linereg)
-burkResultsT1$RootVolume <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+burkResultsT1 <- data.frame(PlantHeight=numeric(n),LeafArea=numeric(n),RootLength=numeric(n),RootVolume=numeric(n))
+rownames(burkResultsT1) <- c("Genotype","Inoculation","Genotype:Inoculation", "Residuals")
 
-# Now Normalize all the columns
-burkT1 <- burkResultsT1
+myvars <- names(Burk_data[5:8]) # create a list of traits
+Signif_list <- list()
 
-burkT1[] <- lapply(burkT1[], function(x) x/sum(x))
+for( m in myvars){
+  print(m)
+  print(as.name(m))
+  linmod <- lm(Burk_data[[m]] ~ Genotype + Condition + Genotype:Condition, data = Burk_data)
+  HPH1 <- anova(linmod)
+  print(HPH1)
+  burkResultsT1[[m]] <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2])
+  itlist = HPH1[,5]
+  Signif_list <- append(Signif_list, itlist)
+}
 
-setDT(burkT1, keep.rownames = TRUE)[]
+#Get rid of the NAs from residuals
+Signif_list[is.na(Signif_list)] = 1
+Signif_list
 
-burkT1_long <- burkT1 %>%
-  gather(burkT1, value,PlantHeight:RootVolume)
-
-burkT1_long$Signif <- c("*", " ", " ", " "," ", "*", " ", " ","*", " ", "*", " "," ", " ", " ", "*"," ", "*", " ", " ")
-
-# Serendip data
-SereResultsT1 <- data.frame(PlantHeight=numeric(5),RootLength=numeric(5),RootMass=numeric(5),ShootMass=numeric(5))
-rownames(SereResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
-
-SerePlantHeightLM <- lm(PlantHeight ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
-HPH1 <- anova(SerePlantHeightLM)
-SereResultsT1$PlantHeight <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
-
-linereg <- lm(RootLength ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
-HPH1 <- anova(linereg)
-SereResultsT1$RootLength <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
-
-linereg <- lm(RootMass ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
-HPH1 <- anova(linereg)
-SereResultsT1$RootMass <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
-
-linereg <- lm(ShootMass ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
-HPH1 <- anova(linereg)
-SereResultsT1$ShootMass <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# Convert these p values to *
+for( s in 1:length(Signif_list)){
+  #print(s)
+  if (Signif_list[s] < .05){
+    Signif_list[s] <- '*'
+    #print("True")
+  } else {
+    Signif_list[s] <- " "
+    #print("False")
+  }
+}
+Signif_list
 
 # Now Normalize all the columns
-SereT1 <- SereResultsT1
+BurkT1 <- burkResultsT1
 
-SereT1[] <- lapply(SereT1[], function(x) x/sum(x))
+BurkT1[] <- lapply(BurkT1[], function(x) x/sum(x))
+setDT(BurkT1, keep.rownames = TRUE)[]
 
-setDT(SereT1, keep.rownames = TRUE)[]
+BurkT1_long <- BurkT1 %>%
+  gather(BurkT1, value,PlantHeight:RootVolume)
 
-SereT1_long <- SereT1 %>%
-  gather(SereT1, value,PlantHeight:ShootMass)
+BurkT1_long$Signif <- Signif_list
 
-SereT1_long$Signif <- c("*", "*", " ", " "," ", "*", "*", " "," ", " ", "*", "*"," ", " ", " ", "*","*", " ", " ", " ")
-
-#################### Poster figure: combine all
 
 # Endophytes included in Name: don't like that but without empty faceting
 SereT1_long["Endophyte"] <- "Serendipita"
 HerbT1_long["Endophyte"] <- "Herbaspirillum"
-burkT1_long["Endophyte"] <- "Burkholderia"
+BurkT1_long["Endophyte"] <- "Burkholderia"
 
-#SereT1_long$SereT1 <- paste("Serendipita", SereT1_long$SereT1, sep="_")
-#HerbT1_long$HerbT1 <- paste("Herbaspirillum", HerbT1_long$HerbT1, sep="_")
-#burkT1_long$burkT1 <- paste("Burkholderia", burkT1_long$burkT1, sep = "_")
 
-names(SereT1_long)[names(SereT1_long) == "SereT1"] <- "Phenotype"
+names(SereT1_long)[names(SereT1_long) == "ST1"] <- "Phenotype"
 names(HerbT1_long)[names(HerbT1_long) == "HerbT1"] <- "Phenotype"
-names(burkT1_long)[names(burkT1_long) == "burkT1"] <- "Phenotype"
+names(BurkT1_long)[names(BurkT1_long) == "BurkT1"] <- "Phenotype"
 
-SandHandB <- rbind(HerbT1_long,burkT1_long,SereT1_long)
+SandHandB <- rbind(HerbT1_long,BurkT1_long,SereT1_long)
 
-cbPalette <- c("#999999", "#F0E442", "tan3", "#56B4E9", "forestgreen", "#0072B2", "#D55E00", "#CC79A7")
+cbPalette <- c("#999999", "forestgreen", "tan3", "#56B4E9", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-fig3_cap = "Sum square analysis of phenotypes for all genotypes, separated by endophyte. Asterisks denote significance based on ANOVA analysis. This Sum Square analysis allows us to visualize where the variance in phenotype is orginating from."
+fig3_cap = "Figure 4: Sum square analysis of phenotypes for all genotypes, separated by endophyte. Asterisks denote significance based on ANOVA analysis. This Sum Square analysis allows us to visualize where the variance in phenotype is orginating from."
 
 ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), label = Signif)) + 
   geom_col(position=position_stack()) + theme(axis.text.x = element_text( size = 12)) + 
   theme(axis.text.y = element_text(size = 14)) + 
-  labs(fill = "Variables") + geom_text(aes(label = Signif), size = 5, position = position_stack(vjust = .5))+ 
+  labs(fill = "Variables") + geom_text(aes(label = Signif), size = 10, position = position_stack(vjust = .5), hjust = .25)+ 
   ggtitle("Breakdown of Sum Squares Analysis") + xlab("Measured Phenotypes") + coord_flip() +
   ylab("Proportion of SS") + scale_fill_manual(values=cbPalette) +
   theme(panel.background = element_rect(fill = "white",
@@ -1016,12 +1048,165 @@ ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), lab
   theme(legend.position = "right") + theme(axis.line = element_line(colour = "white"), 
                                            panel.border = element_blank()) +
   labs(caption=str_wrap(fig3_cap, 100)) + 
-  theme(plot.caption = element_text(hjust = 0.5,size = 12))
+  theme(plot.caption = element_text(hjust = 0.5,size = 16))
 
+
+# # Herb data
+# HerbResultsT1 <- data.frame(Chlorophyll1=numeric(4),Chlorophyll2=numeric(5),Chlorophyll3=numeric(5),PlantHeight=numeric(5),LeafArea=numeric(5),RootLength=numeric(5),RootVolume=numeric(5))
+# rownames(HerbResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
+# 
+# HerbPlantHeightLM <- lm(PlantHeight ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+# HPH1 <- anova(HerbPlantHeightLM)
+# HerbResultsT1$PlantHeight <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# HerbChl1LM <- lm(Chlorophyll1 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+# HPH1 <- anova(HerbChl1LM)
+# HerbResultsT1$Chlorophyll1 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# linereg <- lm(Chlorophyll2 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+# HPH1 <- anova(linereg)
+# HerbResultsT1$Chlorophyll2 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# linereg <- lm(Chlorophyll3 ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+# HPH1 <- anova(linereg)
+# HerbResultsT1$Chlorophyll3 <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# linereg <- lm(LeafArea ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+# HPH1 <- anova(linereg)
+# HerbResultsT1$LeafArea <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# linereg <- lm(RootLength ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+# HPH1 <- anova(linereg)
+# HerbResultsT1$RootLength <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# linereg <- lm(RootVolume ~ Genotype +Condition + Rep + Genotype*Condition, data=Herb_data)
+# HPH1 <- anova(linereg)
+# HerbResultsT1$RootVolume <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# # Now Normalize all the columns
+# HerbT1 <- HerbResultsT1
+# 
+# HerbT1[] <- lapply(HerbT1[], function(x) x/sum(x))
+# setDT(HerbT1, keep.rownames = TRUE)[]
+# 
+# HerbT1_long <- HerbT1 %>%
+#   gather(HerbT1, value,Chlorophyll1:RootVolume)
+# 
+# 
+# HerbT1_long$Signif <- c("*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", "*", " ", " ", " ","*", " ", "*", " ", " ","*", " ", " ", " ", " ","*", " ", " ", " ", " ","*", " ", " ", "*", " ")
+# 
+# HerbT1_long
+# 
+# # burk data
+# burkResultsT1 <- data.frame(PlantHeight=numeric(5),LeafArea=numeric(5),RootLength=numeric(5),RootVolume=numeric(5))
+# rownames(burkResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
+# 
+# SerePlantHeightLM <- lm(PlantHeight ~ Genotype +Condition + Rep + Genotype*Condition, data=Burk_data)
+# HPH1 <- anova(SerePlantHeightLM)
+# burkResultsT1$PlantHeight <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# linereg <- lm(LeafArea ~ Genotype +Condition + Rep + Genotype*Condition, data=Burk_data)
+# HPH1 <- anova(linereg)
+# burkResultsT1$LeafArea <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# 
+# linereg <- lm(as.numeric(RootLength) ~ Genotype +Condition + Rep + Genotype*Condition, data=Burk_data)
+# HPH1 <- anova(linereg)
+# burkResultsT1$RootLength <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# linereg <- lm(as.numeric(RootVolume) ~ Genotype +Condition + Rep + Genotype*Condition, data=Burk_data)
+# HPH1 <- anova(linereg)
+# burkResultsT1$RootVolume <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# # Now Normalize all the columns
+# burkT1 <- burkResultsT1
+# 
+# burkT1[] <- lapply(burkT1[], function(x) x/sum(x))
+# 
+# setDT(burkT1, keep.rownames = TRUE)[]
+# 
+# burkT1_long <- burkT1 %>%
+#   gather(burkT1, value,PlantHeight:RootVolume)
+# 
+# burkT1_long$Signif <- c("*", " ", " ", " "," ", "*", " ", " ","*", " ", "*", " "," ", " ", " ", "*"," ", "*", " ", " ")
+# 
+# # Serendip data
+# SereResultsT1 <- data.frame(PlantHeight=numeric(5),RootLength=numeric(5),RootMass=numeric(5),ShootMass=numeric(5))
+# rownames(SereResultsT1) <- c("Genotype","Inoculation","Rep","Genotype:Inoculation","Residuals")
+# 
+# SerePlantHeightLM <- lm(PlantHeight ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
+# HPH1 <- anova(SerePlantHeightLM)
+# SereResultsT1$PlantHeight <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# linereg <- lm(RootLength ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
+# HPH1 <- anova(linereg)
+# SereResultsT1$RootLength <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# linereg <- lm(RootMass ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
+# HPH1 <- anova(linereg)
+# SereResultsT1$RootMass <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# linereg <- lm(ShootMass ~ Genotype +Condition + Rep + Genotype*Condition, data=Serendip_data)
+# HPH1 <- anova(linereg)
+# SereResultsT1$ShootMass <- c(HPH1[1,2],HPH1[2,2],HPH1[3,2],HPH1[4,2],HPH1[5,2])
+# 
+# # Now Normalize all the columns
+# SereT1 <- SereResultsT1
+# 
+# SereT1[] <- lapply(SereT1[], function(x) x/sum(x))
+# 
+# setDT(SereT1, keep.rownames = TRUE)[]
+# 
+# SereT1_long <- SereT1 %>%
+#   gather(SereT1, value,PlantHeight:ShootMass)
+# 
+# SereT1_long$Signif <- c("*", "*", " ", " "," ", "*", "*", " "," ", " ", "*", "*"," ", " ", " ", "*","*", " ", " ", " ")
+# 
+# #################### Poster figure: combine all
+# 
+# # Endophytes included in Name: don't like that but without empty faceting
+# SereT1_long["Endophyte"] <- "Serendipita"
+# HerbT1_long["Endophyte"] <- "Herbaspirillum"
+# burkT1_long["Endophyte"] <- "Burkholderia"
+# 
+# #SereT1_long$SereT1 <- paste("Serendipita", SereT1_long$SereT1, sep="_")
+# #HerbT1_long$HerbT1 <- paste("Herbaspirillum", HerbT1_long$HerbT1, sep="_")
+# #burkT1_long$burkT1 <- paste("Burkholderia", burkT1_long$burkT1, sep = "_")
+# 
+# names(SereT1_long)[names(SereT1_long) == "SereT1"] <- "Phenotype"
+# names(HerbT1_long)[names(HerbT1_long) == "HerbT1"] <- "Phenotype"
+# names(burkT1_long)[names(burkT1_long) == "burkT1"] <- "Phenotype"
+# 
+# SandHandB <- rbind(HerbT1_long,burkT1_long,SereT1_long)
+# 
+# cbPalette <- c("#999999", "#F0E442", "tan3", "#56B4E9", "forestgreen", "#0072B2", "#D55E00", "#CC79A7")
+# 
+# fig3_cap = "Figure 4: Sum square analysis of phenotypes for all genotypes, separated by endophyte. Asterisks denote significance based on ANOVA analysis. This Sum Square analysis allows us to visualize where the variance in phenotype is orginating from."
+# 
+# ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), label = Signif)) + 
+#   geom_col(position=position_stack()) + theme(axis.text.x = element_text( size = 12)) + 
+#   theme(axis.text.y = element_text(size = 14)) + 
+#   labs(fill = "Variables") + geom_text(aes(label = Signif), size = 5, position = position_stack(vjust = .5))+ 
+#   ggtitle("Breakdown of Sum Squares Analysis") + xlab("Measured Phenotypes") + coord_flip() +
+#   ylab("Proportion of SS") + scale_fill_manual(values=cbPalette) +
+#   theme(panel.background = element_rect(fill = "white",
+#                                         colour = "white"), 
+#         panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+#                                         colour = "white"), 
+#         panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+#                                         colour = "white")) + 
+#   facet_grid(rows = vars(Endophyte), drop = TRUE, space = "free", scales = "free") + 
+#   theme(legend.position = "right") + theme(axis.line = element_line(colour = "white"), 
+#                                            panel.border = element_blank()) +
+#   labs(caption=str_wrap(fig3_cap, 100)) + 
+#   theme(plot.caption = element_text(hjust = 0.5,size = 12))
+# 
 
 
 
 # Figure 4 - qPCR - not sure how to add space without faceting and that looks stupid
+# Have to run qPCR analysis above for this to work 
+
 foldchange_df$Grow_Number <- gsub('1', 'Grow 1', foldchange_df$Grow_Number)
 foldchange_df$Grow_Number <- gsub('3', 'Grow 2', foldchange_df$Grow_Number)
 
@@ -1040,14 +1225,14 @@ ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fi
         panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
                                         colour = "light grey"))
 
-fig4_cap = "Figure 4. Serendipita colonization levels. Quantitative PCR was used to quantify the Serendipita ITS3 gene and normalize relative to the maize CDK housekeeping gene. In both grows, higher levels of colonization coincided with significant growth promotion (marked by asterisk). While the highest three lines in both experiments experienced growth promotion, the two lines with the lowest colonization did not. In fact, maize lines CML103 and B73 actually experienced a decrease in root length when inoculated with Serendipita."
+fig4_cap = "Figure 5: Serendipita colonization levels. Quantitative PCR was used to quantify the Serendipita ITS3 gene and normalize relative to the maize CDK housekeeping gene. In both grows, higher levels of colonization coincided with significant growth promotion (marked by asterisk). While the highest three lines in both experiments experienced growth promotion, the two lines with the lowest colonization did not. In fact, maize lines CML103 and B73 actually experienced a decrease in root length when inoculated with Serendipita."
 # With Faceting:
 ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fill = Grow_Number, label = Significance)) + 
   geom_bar(stat = "summary", fun = "mean", position="dodge") + 
   theme(plot.title = element_text(size=18),axis.text.x = element_text(size=18, angle = 90), axis.text.y = element_text(size=18), axis.title = element_text(size = 18)) + 
   scale_fill_manual(values = c("#56B4E9", "tan3")) + 
   ggtitle("Differences in Serendipita Abundance by Genotype") + xlab("Genotype") + 
-  ylab("Foldchange Fungal Abundance") + geom_text(aes(label = Significance), size = 5, position = position_stack(vjust = .5)) + 
+  ylab("Foldchange Fungal Abundance") + geom_text(aes(label = Significance), size = 10, position = position_stack(vjust = .5)) + 
   annotate("text", x = 3, y = 5, size=5, label = " P-Values for a phenotype less than:\n ~ = 0.1,    * = 0.05 ") +
   theme(panel.background = element_rect(fill = "white",
                                         colour = "white"), 
@@ -1059,7 +1244,7 @@ ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fi
   theme(legend.position = "right") + theme(axis.line = element_line(colour = "white"), 
                                            panel.border = element_blank()) +
   labs(caption=str_wrap(fig4_cap, 100)) + 
-  theme(plot.caption = element_text(hjust = 0.5,size = 12))
+  theme(plot.caption = element_text(hjust = 0.5,size = 16))
 
 
 # add just an empty column?
