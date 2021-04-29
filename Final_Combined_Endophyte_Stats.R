@@ -874,7 +874,7 @@ n = 4
 
 # Serendipita
 SereResultsT1 <- data.frame(PlantHeight=numeric(n),RootLength=numeric(n),RootMass=numeric(n),ShootMass=numeric(n))
-rownames(SereResultsT1) <- c("Genotype","Inoculation","Genotype:Inoculation", "Residuals")
+rownames(SereResultsT1) <- c("Genotype","Inoculation","Geno:Inoculation", "Residuals")
 
 myvars <- names(Serendip_data[5:8]) # create a list of traits
 Signif_list <- list()
@@ -921,7 +921,7 @@ SereT1_long$Signif <- Signif_list
 
 # Herbaspirillum
 HerbResultsT1 <- data.frame(Chlorophyll1=numeric(n),Chlorophyll2=numeric(n),Chlorophyll3=numeric(n),PlantHeight=numeric(n),LeafArea=numeric(n),RootLength=numeric(n),RootVolume=numeric(n))
-rownames(HerbResultsT1) <- c("Genotype","Inoculation","Genotype:Inoculation", "Residuals")
+rownames(HerbResultsT1) <- c("Genotype","Inoculation","Geno:Inoculation", "Residuals")
 
 myvars <- names(Herb_data[5:11]) # create a list of traits
 Signif_list <- list()
@@ -971,7 +971,7 @@ Burk_data$RootLength <- as.numeric(Burk_data$RootLength)
 Burk_data$RootVolume <- as.numeric(Burk_data$RootVolume)
 
 burkResultsT1 <- data.frame(PlantHeight=numeric(n),LeafArea=numeric(n),RootLength=numeric(n),RootVolume=numeric(n))
-rownames(burkResultsT1) <- c("Genotype","Inoculation","Genotype:Inoculation", "Residuals")
+rownames(burkResultsT1) <- c("Genotype","Inoculation","Geno:Inoculation", "Residuals")
 
 myvars <- names(Burk_data[5:8]) # create a list of traits
 Signif_list <- list()
@@ -1050,6 +1050,26 @@ ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), lab
   labs(caption=str_wrap(fig3_cap, 100)) + 
   theme(plot.caption = element_text(hjust = 0.5,size = 16))
 
+# Calculate total variance due to genotype 
+SandHandB
+# Need to change Genotype: Inoculation name - just changed column names above
+# SandHandB <- as.data.frame(lapply(SandHandB, function(x) {
+#   gsub("Genotype:Inoculation", "GenxInoc", x)
+# }))
+
+count = 0.0
+sum = 0.0
+
+for (row in 1:nrow(SandHandB)){
+  if(grepl("Genotype", SandHandB[row, 1])){
+    count = count+1
+    sum = sum + (SandHandB[row,3])
+    #print(SandHandB[row,3])
+}}
+print(sum/count) 
+# Without Group Genotype Variance = .55
+# With Group Genotype Variance = .39
+# Group Variance = .188
 
 # # Herb data
 # HerbResultsT1 <- data.frame(Chlorophyll1=numeric(4),Chlorophyll2=numeric(5),Chlorophyll3=numeric(5),PlantHeight=numeric(5),LeafArea=numeric(5),RootLength=numeric(5),RootVolume=numeric(5))
