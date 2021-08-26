@@ -56,8 +56,8 @@ doubledelta_df <- doubledelta_df[!(doubledelta_df$Genotype=="MO18W"),]
 
 
 # Transform to fold change
-#foldchange_df = transform.data.frame(doubledelta_df, Double_Delta = log(2^-Double_Delta))
-foldchange_df = transform.data.frame(doubledelta_df, Double_Delta = log2(-Double_Delta)) # same pattern slightly smaller?
+foldchange_df = transform.data.frame(doubledelta_df, Double_Delta = log(2^-Double_Delta))
+#foldchange_df = transform.data.frame(doubledelta_df, Double_Delta = 2^(-Double_Delta))
 
 # Add phenotype significance from t - tests .1 - .05 : This significance values are calculated for the actual phenotype in 2_T_GrowthSignif_TTest and applied here
 foldchange_df['Significance'] <- c('~',' ',' ',' ','*','~',' ','*','*','*')
@@ -86,7 +86,7 @@ fig4_qpcr <- ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Dou
                                         colour = "light grey"), 
         panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
                                         colour = "light grey"))  +
-  facet_grid(cols = vars(Grow_Number), drop = TRUE, space = "free", scales = "free") + ylim(0,6) +
+  facet_grid(cols = vars(Grow_Number), drop = TRUE, space = "free", scales = "free") + #ylim(0,6) +
   theme(legend.position = "right") + theme(axis.line = element_line(colour = "white"), 
                                            panel.border = element_blank())  +
   theme(strip.text.x = element_text(size = 18)) + theme(legend.title = element_blank()) + theme(legend.position = "none")
@@ -101,5 +101,5 @@ dat_txt <- data.frame(
 )
 
 fig4_qpcr + geom_text(data = dat_txt,
-                      mapping = aes(x = 4.5, y = 5.5, label = label),
+                      mapping = aes(x = 4.5, y = 9.0, label = label),
                       size = 8) + coord_cartesian(xlim = c(1,5), clip = 'off')
