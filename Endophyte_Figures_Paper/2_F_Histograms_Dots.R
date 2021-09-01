@@ -39,7 +39,7 @@ Fig2A_above <- ggplot(Serendip_data, aes(x =Genotype, y=ShootMass, group = Condi
                                                                             colour = "light grey"), 
                                             panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
                                                                             colour = "light grey")) +
-  annotate("text", x = 13.5, y = 250, label = " * p < .05", size = 8) + coord_cartesian(xlim = c(0,12), clip = 'off')+
+  annotate("text", x = 15, y = 250, label = " * p < .05", size = 8) + coord_cartesian(xlim = c(0,12), clip = 'off')+
   annotate("text", x = 10, y = 400, label = " * ", size = 18) + 
   annotate("text", x = 11, y = 400, label = " * ", size = 18) +
   annotate("text", x = 12, y = 750, label = " * ", size = 18) + theme(legend.position = "right")
@@ -58,7 +58,7 @@ Fig2B_above <- ggplot(Serendip_data, aes(x =Genotype, y=RootMass, group = Condit
                                                                            colour = "light grey"), 
                                            panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
                                                                            colour = "light grey")) +
-  annotate("text", x = 13.5, y = 100, label = " * p < .05", size = 8) + coord_cartesian(xlim = c(0,12), ylim = c(0,600), clip = 'off') +
+  annotate("text", x = 15, y = 100, label = " * p < .05", size = 8) + coord_cartesian(xlim = c(0,12), ylim = c(0,600), clip = 'off') +
   annotate("text", x = 6, y = 500, label = " * ", size = 18) + 
   annotate("text", x = 11, y = 250, label = " * ", size = 18) 
 # labs(caption=str_wrap(fig2_cap, 100)) + 
