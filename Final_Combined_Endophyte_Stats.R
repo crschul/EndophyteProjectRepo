@@ -1,3 +1,35 @@
+# This script will combine the analysis and create final figures for my final combined data. 
+
+getwd()
+setwd("/home/coreyschultz/1.Projects/2.Maize.Endophyte.Project/Final_Data_and_Figs")
+getwd()
+library(tidyr)
+library(tidyverse)
+library(broom)
+library(ggplot2)
+library(car)
+library(data.table)
+library(ggpubr)
+
+Herb_data = read.csv("Final_Herb_Data.csv", sep =",")
+Burk_data = read.csv("Final_Burk_Data.csv", sep =",")
+Serendip_data = read.csv("Final_Sbecsii_Data.csv", sep =",")
+
+
+#get sd for error bars
+data_summary <- function(data, varname, groupnames){
+  require(plyr)
+  
+  summary_func <- function(x, col){
+    c(mean = mean(x[[col]], na.rm=TRUE),
+      sd = sd(x[[col]], na.rm=TRUE))
+  }
+  data_sum<-ddply(data, groupnames, .fun=summary_func,
+                  varname)
+  data_sum <- rename(data_sum, c("mean" = varname))
+  return(data_sum)
+}
+##########################################################################################
 ## Herbaspirillium Stuff
 ##########################################################################################
 

@@ -1,4 +1,4 @@
-# This script will combine the analysis and create final figures for my final combined data. 
+# Testing Mixed Models for confounding variables 
 
 getwd()
 setwd("/home/coreyschultz/1.Projects/2.Maize.Endophyte.Project/Final_Data_and_Figs")
@@ -10,6 +10,8 @@ library(ggplot2)
 library(car)
 library(data.table)
 library(ggpubr)
+library(lme4)
+library(lmerTest)
 
 Herb_data = read.csv("Final_Herb_Data.csv", sep =",")
 Burk_data = read.csv("Final_Burk_Data.csv", sep =",")

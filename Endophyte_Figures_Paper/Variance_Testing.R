@@ -51,7 +51,16 @@ for( m in myvars){
   print(shapiro.test(Serendip_data[[m]]))
   print(leveneTest(Serendip_data[[m]] ~ Genotype*Condition, data = Serendip_data))
   linmod <- lm(Serendip_data[[m]] ~ Genotype + Condition + Genotype:Condition, data = Serendip_data)
+  linmod2 <- lm(Serendip_data[[m]] ~ Condition + Genotype + Condition:Genotype, data = Serendip_data)
   hist(residuals(linmod))
+  print(shapiro.test(residuals(linmod)))
+  anv <- anova(linmod)
+  print(anv) # type 1
+  print(anova(linmod2)) # type 1 switched
+  print(Anova(lm(Serendip_data[[m]] ~ Genotype + Condition + Genotype:Condition, data = Serendip_data),type = 2)) # Type 2
+  print(Anova(lm(Serendip_data[[m]] ~ Genotype + Condition + Genotype:Condition, data = Serendip_data),type = 3)) # type 3
+  print(" ")
+  print(" ******************************************************************************************")
 }
 
 # Herbaspirillum
@@ -72,7 +81,17 @@ for( m in myvars){
   print(shapiro.test(Herb_data[[m]]))
   print(leveneTest(Herb_data[[m]] ~ Genotype*Condition, data = Herb_data))
   linmod <- lm(Herb_data[[m]] ~ Genotype + Condition + Genotype:Condition, data = Herb_data)
+  linmod2 <- lm(Herb_data[[m]] ~ Condition + Genotype + Condition:Genotype, data = Herb_data)
   hist(residuals(linmod))
+  print(shapiro.test(residuals(linmod)))
+  anv <- anova(linmod)
+  print(anv) # type 1
+  print(anova(linmod2)) # type 1 switched
+  print(Anova(lm(Herb_data[[m]] ~ Genotype + Condition + Genotype:Condition, data = Herb_data),type = 2)) # Type 2
+  print(Anova(lm(Herb_data[[m]] ~ Genotype + Condition + Genotype:Condition, data = Herb_data),type = 3)) # type 3
+  print(" ")
+  print(" ******************************************************************************************")
+  
 }
 
 # Burkholderia
@@ -91,6 +110,15 @@ for( m in myvars){
   print(shapiro.test(Burk_data[[m]] ))
   print(leveneTest(Burk_data[[m]]  ~ Genotype*Condition, data = Burk_data))
   linmod <- lm(Burk_data[[m]] ~ Genotype + Condition + Genotype:Condition, data = Burk_data)
+  linmod2 <- lm(Burk_data[[m]] ~ Condition + Genotype + Condition:Genotype, data = Burk_data)
   hist(residuals(linmod))
+  print(shapiro.test(residuals(linmod)))
+  anv <- anova(linmod)
+  print(anv) # type 1
+  print(anova(linmod2)) # type 1 switched
+  print(Anova(lm(Burk_data[[m]] ~ Genotype + Condition + Genotype:Condition, data = Burk_data),type = 2)) # Type 2
+  print(Anova(lm(Burk_data[[m]] ~ Genotype + Condition + Genotype:Condition, data = Burk_data),type = 3)) # type 3
+  print(" ")
+  print(" **************************************************************")
 }
 
