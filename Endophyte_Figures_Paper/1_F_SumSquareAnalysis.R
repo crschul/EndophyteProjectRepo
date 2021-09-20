@@ -204,9 +204,15 @@ SandHandB$Phenotype[SandHandB$Phenotype == "LeafArea"] <- "Leaf Area"
 SandHandB$Phenotype[SandHandB$Phenotype == "RootLength"] <- "Root Length"
 SandHandB$Phenotype[SandHandB$Phenotype == "RootVolume"] <- "Root Volume"
 SandHandB$Phenotype[SandHandB$Phenotype == "ShootMass"] <- "Shoot Mass"
+SandHandB$Phenotype[SandHandB$Phenotype == "RootMass"] <- "Root Mass"
+
+# Change names in legends to fit the manuscript text
+SandHandB$rn[SandHandB$rn == "Genotype"] <- "Maize Genotype"
+SandHandB$rn[SandHandB$rn == "Inoculation"] <- "Endophyte Inoculation"
+SandHandB$rn[SandHandB$rn == "Genotype:Inoculation"] <- "Genome-by-Genome Interaction"
 
 # reorder legend 
-SandHandB$rn <- factor(SandHandB$rn, levels = c("Genotype","Genotype:Inoculation","Inoculation","Residuals"))
+SandHandB$rn <- factor(SandHandB$rn, levels = c("Maize Genotype","Genome-by-Genome Interaction","Endophyte Inoculation","Residuals"))
 
 # why do I need to use another vjust? cus its turned sideways? that is stupid
 ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), label = Signif)) + 
