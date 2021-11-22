@@ -234,7 +234,7 @@ ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), lab
   theme(legend.title = element_text(size=18)) + theme(legend.text = element_text(size=14)) + 
   theme(strip.text.y = element_text(size = 14)) + theme(plot.title = element_text(size=20)) +
   theme(axis.title.x = element_text(30)) + theme(axis.title.y = element_text(20)) + 
-  guides(fill = guide_legend(reverse = TRUE))
+  guides(fill = guide_legend(reverse = TRUE)) + theme(legend.position = "bottom")
 
 
 # Need to change Genotype: Inoculation name - just changed column names above
