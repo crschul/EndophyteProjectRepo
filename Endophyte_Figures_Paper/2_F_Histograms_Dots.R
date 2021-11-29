@@ -71,5 +71,5 @@ Fig2B_above
 Figure2 <- ggarrange(Fig2A_above, Fig2B_above, ncol =1, nrow = 2, labels = c("A", "B"))
 Figure2
 
-ggsave("Fig2_Endo_Submission", Figure2, device = "png", width = 8, height = 10, dpi = 800)
+ggsave("Fig2_Endo_Submission.png", Figure2, device = "png", width = 8, height = 10, dpi = 800)
 

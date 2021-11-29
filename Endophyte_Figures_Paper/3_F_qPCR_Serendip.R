@@ -74,7 +74,7 @@ foldchange_df$Grow_Number <- gsub('3', 'Grow 2', foldchange_df$Grow_Number)
 
 
 # With Faceting:
-fig4_qpcr <- ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fill = Grow_Number, label = Significance)) + 
+fig3_qpcr <- ggplot(foldchange_df, aes(x = reorder(Genotype, -Double_Delta), Double_Delta, fill = Grow_Number, label = Significance)) + 
   geom_bar(stat = "summary", fun = "mean", position="dodge") + 
   theme(plot.title = element_text(size=18),axis.text.x = element_text(size=18, angle = 90), axis.text.y = element_text(size=18), axis.title = element_text(size = 18)) + 
   scale_fill_manual(values = c("#56B4E9", "tan3")) + 
@@ -100,6 +100,8 @@ dat_txt <- data.frame(
   Grow_Number = c("Grow 2")
 )
 
-fig4_qpcr + geom_text(data = dat_txt,
+qpcr_fig <- fig3_qpcr + geom_text(data = dat_txt,
                       mapping = aes(x = 4.5, y = 9.0, label = label),
                       size = 8) + coord_cartesian(xlim = c(1,5), clip = 'off')
+
+ggsave("Fig3_Endo_Submission.png", qpcr_fig, device = "png", width = 10, height = 5, dpi = 300)

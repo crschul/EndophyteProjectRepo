@@ -237,7 +237,7 @@ fig_1 <- ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev
   guides(fill = guide_legend(reverse = TRUE)) + theme(legend.position = "bottom")
 
 
-ggsave("Fig1_Endo_Submission", fig_1, device = "png", width = 10, height = 5, dpi = 800)
+ggsave("Fig1_Endo_Submission.png", fig_1, device = "png", width = 10, height = 5, dpi = 800)
 
 # Need to change Genotype: Inoculation name - just changed column names above
 SandHandB <- as.data.frame(lapply(SandHandB, function(x) {
