@@ -215,7 +215,7 @@ SandHandB$rn[SandHandB$rn == "Genotype:Inoculation"] <- "Genome-by-Genome Intera
 SandHandB$rn <- factor(SandHandB$rn, levels = c("Maize Genotype","Genome-by-Genome Interaction","Endophyte Inoculation","Residuals"))
 
 # why do I need to use another vjust? cus its turned sideways? that is stupid
-ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), label = Signif)) + 
+fig_1 <- ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), label = Signif)) + 
   geom_col(position=position_stack()) + theme(axis.text.x = element_text( size = 14)) + 
   theme(axis.text.y = element_text(size = 14)) + 
   labs(fill = "Variables") + geom_text(aes(label = Signif), size = 10, position = position_stack(vjust = 0.5), 
@@ -237,6 +237,8 @@ ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), lab
   guides(fill = guide_legend(reverse = TRUE)) + theme(legend.position = "bottom")
 
 
+ggsave("Fig1_Endo_Submission", fig_1, device = "png", width = 10, height = 5, dpi = 800)
+
 # Need to change Genotype: Inoculation name - just changed column names above
 SandHandB <- as.data.frame(lapply(SandHandB, function(x) {
   gsub("Genotype:Inoculation", "GenxInoc", x)
@@ -254,7 +256,7 @@ count = 0.0
 sum = 0.0
 
 for (row in 1:nrow(SandHandB)){
-  if(grepl("GenxInoc", SandHandB[row, 1])){
+  if(grepl("Genome-by-Genome Interaction", SandHandB[row, 1])){
     count = count + 1
     sum = sum + as.numeric(as.character(SandHandB[row,3]))
     #print(SandHandB[row,3])
