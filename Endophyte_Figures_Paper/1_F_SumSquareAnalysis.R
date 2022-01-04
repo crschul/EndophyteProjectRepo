@@ -236,8 +236,34 @@ fig_1 <- ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev
   theme(axis.title.x = element_text(30)) + theme(axis.title.y = element_text(20)) + 
   guides(fill = guide_legend(reverse = TRUE)) + theme(legend.position = "bottom")
 
+ggsave("Fig1_Endo_Submission.png", fig_1, device = "png", width = 12, height = 5, dpi = 800)
 
-ggsave("Fig1_Endo_Submission.png", fig_1, device = "png", width = 10, height = 5, dpi = 800)
+# pag high dpi fig
+
+SnB <- subset(SandHandB, Endophyte!= "Experiment 2 \n (Burkholderia)")
+
+fig_1_pag1000 <- ggplot(SnB, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), label = Signif)) + 
+  geom_col(position=position_stack()) + theme(axis.text.x = element_text( size = 28)) + 
+  theme(axis.text.y = element_text(size = 28)) + 
+  labs(fill = "Variables") + geom_text(aes(label = Signif), size = 20, position = position_stack(vjust = 0.5), 
+                                       vjust = .75)+ 
+  xlab("Measured Phenotypes") + coord_flip() +
+  ylab("Proportion of SS") + scale_fill_manual(values=cbPalette) +
+  theme(panel.background = element_rect(fill = "white",
+                                        colour = "white"), 
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "white"), 
+        panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
+                                        colour = "white")) + 
+  facet_grid(rows = vars(Endophyte), drop = TRUE, space = "free", scales = "free", switch = NULL) + 
+  theme(legend.position = "right") + theme(axis.line = element_line(colour = "white"), 
+                                           panel.border = element_blank()) + 
+  theme(legend.title = element_text(size=36)) + theme(legend.text = element_text(size=28)) + 
+  theme(strip.text.y = element_text(size = 28)) + theme(plot.title = element_text(size=40)) +
+  theme(axis.title.x = element_text(60)) + theme(axis.title.y = element_text(40)) + 
+  guides(fill = guide_legend(reverse = TRUE)) + theme(legend.position = "bottom")
+
+ggsave("Fig1_pag1000.png", fig_1_pag1000, device = "png", width = 24, height = 10, dpi = 1000)
 
 # Need to change Genotype: Inoculation name - just changed column names above
 SandHandB <- as.data.frame(lapply(SandHandB, function(x) {
