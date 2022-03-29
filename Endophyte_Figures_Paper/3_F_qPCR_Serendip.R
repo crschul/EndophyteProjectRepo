@@ -105,3 +105,36 @@ qpcr_fig <- fig3_qpcr + geom_text(data = dat_txt,
                       size = 8) + coord_cartesian(xlim = c(1,5), clip = 'off')
 
 ggsave("Fig3_Endo_Submission.png", qpcr_fig, device = "png", width = 10, height = 5, dpi = 300)
+
+
+# Correlation with individual samples Phenotype vs Fungal Abundance Calc
+rep1 = filter(qpcr_delta1, TechRep == 1)
+
+rep1$ID = paste(rep1$Genotype,rep1$Condition,rep1$BioRep, sep = "_")
+
+Serendip_data$ID = paste(Serendip_data$Genotype,Serendip_data$Condition,Serendip_data$Rep, sep = "_")
+
+rep1 <- rep1 %>%
+  select(calcs,ID)
+
+#idf = merge(x = Serendip_data, y = rep1[ , c("calcs")], by = "ID", all.x = TRUE)
+
+idf = left_join(Serendip_data,rep1, by="ID")
+idf = drop_na(idf)
+idf <- idf[, -c(1:4)]
+
+set1 = filter(idf, Group_or_Date == 1)
+set2 = filter(idf, Group_or_Date == 2)
+
+# All variables - much better
+cor(idf[,unlist(lapply(idf, is.numeric))], method = "spearman")
+#cor(idf[,unlist(lapply(idf, is.numeric))], method = "pearson")
+
+cor(set1[,unlist(lapply(set1, is.numeric))], method = "spearman")
+cor(set2[,unlist(lapply(set2, is.numeric))], method = "spearman")
+
+# Individual Test for single phenotype
+cor.test(idf$PlantHeight,idf$calcs, method = "spearman", exact = FALSE)
+cor.test(idf$RootLength,idf$calcs, method = "spearman", exact = FALSE)
+cor.test(idf$RootMass,idf$calcs, method = "spearman", exact = FALSE)
+cor.test(idf$ShootMass,idf$calcs, method = "spearman", exact = FALSE)
