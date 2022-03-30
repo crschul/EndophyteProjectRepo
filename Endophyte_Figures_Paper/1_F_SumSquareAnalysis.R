@@ -184,9 +184,9 @@ BurkT1_long$Signif <- Signif_list
 
 
 # Endophytes included in Name: don't like that but without empty faceting
-SereT1_long["Endophyte"] <- "Experiment 3 \n (Serendipita)"
-HerbT1_long["Endophyte"] <- "Experiment 1 \n (Herbaspirillum)"
-BurkT1_long["Endophyte"] <- "Experiment 2 \n (Burkholderia)"
+SereT1_long["Endophyte"] <- "Serendipita"
+HerbT1_long["Endophyte"] <- "Herbaspirillum"
+BurkT1_long["Endophyte"] <- "Burkholderia"
 
 
 names(SereT1_long)[names(SereT1_long) == "ST1"] <- "Phenotype"
@@ -214,6 +214,18 @@ SandHandB$rn[SandHandB$rn == "Genotype:Inoculation"] <- "Genome-by-Genome Intera
 # reorder legend 
 SandHandB$rn <- factor(SandHandB$rn, levels = c("Maize Genotype","Genome-by-Genome Interaction","Endophyte Inoculation","Residuals"))
 
+# Special italicized labels for paper
+#ital.labs <- c("A","B","C")
+
+SandHandB$Endophyte <- factor(SandHandB$Endophyte, levels = c("Herbaspirillum","Burkholderia","Serendipita"), 
+                              labels = c(expression(atop("Experiment 1 ",~italic(Herbaspirillum))),
+                                         expression(atop("Experiment 2 ",~italic(Burkholderia))),
+                                         expression(atop("Experiment 3 ",~italic(Serendipita)))))
+
+#levels(SandHandB$Endophyte) <- c(expression(paste("Experiment 3 \n", italic("Serendipita"))),
+#                                                                expression(paste("Experiment 1 \n", italic("Herbaspirillum"))),
+#                                                                expression(paste("Experiment 2 \n", italic("Burkholderia"))))
+
 # why do I need to use another vjust? cus its turned sideways? that is stupid
 fig_1 <- ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev(rn), label = Signif)) + 
   geom_col(position=position_stack()) + theme(axis.text.x = element_text( size = 14)) + 
@@ -228,7 +240,8 @@ fig_1 <- ggplot(SandHandB, aes(x = Phenotype, y = value, fill = forcats::fct_rev
                                         colour = "white"), 
         panel.grid.minor = element_line(size = 0.25, linetype = 'solid',
                                         colour = "white")) + 
-  facet_grid(rows = vars(Endophyte), drop = TRUE, space = "free", scales = "free", switch = NULL) + 
+  facet_grid(rows = vars(Endophyte), drop = TRUE, space = "free", scales = "free", switch = NULL, labeller = label_parsed) + 
+ # theme(strip.text.y = element_text(face = "italic")) +
   theme(legend.position = "right") + theme(axis.line = element_line(colour = "white"), 
                                            panel.border = element_blank()) + 
   theme(legend.title = element_text(size=18)) + theme(legend.text = element_text(size=14)) + 
